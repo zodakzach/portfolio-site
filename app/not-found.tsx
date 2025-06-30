@@ -1,10 +1,15 @@
-export default function NotFound() {
+import Custom404 from "@/app/components/404";
+
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Page not found",
+};
+
+export default function NotFoundPage() {
   return (
-    <section>
-      <h1 className="mb-8 text-2xl font-semibold tracking-tighter">
-        404 - Page Not Found
-      </h1>
-      <p className="mb-4">The page you are looking for does not exist.</p>
-    </section>
+    <>
+      <Custom404 />
+    </>
   );
 }

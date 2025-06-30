@@ -1,21 +1,37 @@
-import { BlogPosts } from "app/components/posts";
+import Hero from "@/app/components/hero";
 
 export default function Page() {
   return (
-    <section className="min-w-4xl">
-      <h1 className="mb-8 text-2xl font-semibold tracking-tighter">
-        My Portfolio
-      </h1>
-      <p className="mb-4">
-        {`I'm a Vim enthusiast and tab advocate, finding unmatched efficiency in
-        Vim's keystroke commands and tabs' flexibility for personal viewing
-        preferences. This extends to my support for static typing, where its
-        early error detection ensures cleaner code, and my preference for dark
-        mode, which eases long coding sessions by reducing eye strain.`}
-      </p>
-      <div className="my-8">
-        <BlogPosts />
-      </div>
-    </section>
+    <>
+      <Hero
+        tagLine="Hello there, I’m"
+        title="Zachary Cervenka"
+        body={
+          <p>
+            I’m a software engineer passionate about building modern web
+            applications.
+          </p>
+        }
+        image={{
+          url: "/hero-image.png",
+          alt: "Illustration of people building something",
+          asset: {
+            metadata: {
+              dimensions: { width: 800, height: 600 },
+              lqip: "data:image/png;base64,iVBORw0KGgoAAAANS…",
+            },
+          },
+        }}
+        links={[
+          { title: "Get In Touch", href: "/", buttonVariant: "default" },
+          {
+            title: "Projects",
+            href: "/",
+            target: "_blank",
+            buttonVariant: "outline",
+          },
+        ]}
+      />
+    </>
   );
 }

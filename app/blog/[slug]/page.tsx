@@ -61,7 +61,7 @@ export default async function Blog(props) {
   }
 
   return (
-    <section>
+    <section className="mx-auto max-w-4xl px-4 md:px-8">
       <script
         type="application/ld+json"
         suppressHydrationWarning

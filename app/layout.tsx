@@ -48,14 +48,14 @@ export default function RootLayout({
       className={cn(GeistSans.variable, GeistMono.variable)}
       suppressHydrationWarning
     >
-      <body className="bg-background text-foreground mx-auto max-w-4xl overscroll-none antialiased">
+      <body className="bg-background text-foreground mx-auto overscroll-none antialiased">
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
           enableSystem
           disableTransitionOnChange
         >
-          <main className="flex min-w-0 flex-auto flex-col px-2 pt-6 md:px-0">
+          <main className="flex min-w-0 flex-auto flex-col">
             <Navbar />
             {children}
             <Footer />
