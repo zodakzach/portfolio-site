@@ -1,4 +1,4 @@
-import Custom404 from "@/app/components/404";
+import Custom404 from "@/components/404";
 
 import type { Metadata } from "next";
 
