@@ -23,13 +23,8 @@ export default function Page() {
           },
         }}
         links={[
-          { title: "Get In Touch", href: "/", buttonVariant: "default" },
-          {
-            title: "Projects",
-            href: "/",
-            target: "_blank",
-            buttonVariant: "outline",
-          },
+          { title: "Get In Touch", href: "/contact", buttonVariant: "default" },
+          { title: "Projects", href: "/projects", buttonVariant: "outline" },
         ]}
       />
     </>

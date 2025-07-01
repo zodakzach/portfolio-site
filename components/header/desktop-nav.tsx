@@ -19,8 +19,10 @@ export default function DesktopNav({ navItems }: { navItems: NavItem[] }) {
           const isActive = pathname === href;
           return (
             <NavigationMenuItem key={href}>
-              <Link href={href} passHref legacyBehavior>
-                <NavigationMenuLink
+              {/* Tell NavigationMenuLink to render the next/link component */}
+              <NavigationMenuLink asChild>
+                <Link
+                  href={href}
                   className={cn(
                     "hover:bg-muted rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
                     isActive && "bg-muted text-foreground",
@@ -29,8 +31,8 @@ export default function DesktopNav({ navItems }: { navItems: NavItem[] }) {
                   rel={target ? "noopener" : undefined}
                 >
                   {label}
-                </NavigationMenuLink>
-              </Link>
+                </Link>
+              </NavigationMenuLink>
             </NavigationMenuItem>
           );
         })}

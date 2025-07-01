@@ -23,7 +23,7 @@ export interface HeroProps {
   links?: Array<{
     title: string;
     href: string;
-    target?: "_blank" | undefined;
+    target?: "_blank";
     buttonVariant?: React.ComponentProps<typeof Button>["variant"];
   }>;
 }
@@ -65,6 +65,7 @@ export default function Hero({
                     href={link.href}
                     target={link.target}
                     rel={link.target ? "noopener" : undefined}
+                    className="px-6 py-3 text-sm font-medium"
                   >
                     {link.title}
                   </Link>
