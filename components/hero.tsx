@@ -36,7 +36,7 @@ export default function Hero({
   links,
 }: HeroProps) {
   return (
-    <section className="dark:bg-background container mx-auto px-4 py-20 lg:px-8 lg:pt-30">
+    <section className="dark:bg-background container mx-auto px-4 py-20 lg:px-16 lg:pt-30">
       <div className="grid grid-cols-1 gap-10 lg:grid-cols-2">
         <div className="flex flex-col justify-center">
           {tagLine && (

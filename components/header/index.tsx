@@ -5,6 +5,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ModeToggle } from "@/components/theme-toggle";
 import MobileNav from "@/components/header/mobile-nav";
 import DesktopNav from "@/components/header/desktop-nav";
+import { IoLogoGithub } from "react-icons/io";
+import { Separator } from "@/components/ui/separator";
 
 const navItems = [
   {
@@ -43,10 +45,34 @@ export default function Header() {
 
         <div className="hidden items-center justify-between gap-7 xl:flex">
           <DesktopNav navItems={navItems} />
-          <ModeToggle />
+          <div className="flex h-6 items-center space-x-1">
+            <Link
+              href="https://github.com/zodakzach"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:bg-muted rounded p-2 transition"
+              aria-label="View my GitHub"
+            >
+              <IoLogoGithub size={18} />
+            </Link>
+
+            <Separator orientation="vertical" className="border-1" />
+
+            <ModeToggle />
+          </div>
         </div>
 
         <div className="flex items-center xl:hidden">
+          {/* GitHub Link */}
+          <Link
+            href="https://github.com/zodakzach"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:bg-muted rounded p-2 transition"
+            aria-label="View my GitHub"
+          >
+            <IoLogoGithub size={18} />
+          </Link>
           <ModeToggle />
           <MobileNav navItems={navItems} />
         </div>
