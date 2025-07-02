@@ -1,7 +1,19 @@
+import BlogPreview from "@/components/blog-preview";
+import GitHubActivity from "@/components/github-activity";
 import Hero from "@/components/hero";
 import LogoCloud from "@/components/logo-cloud";
+import ProjectsSkills from "@/components/project-skills";
+import { fetchGitHubActivity } from "@/lib/github";
 
-export default function Page() {
+export default async function Page() {
+  const token = process.env.GITHUB_TOKEN;
+  if (!token) throw new Error("Missing GITHUB_TOKEN");
+
+  const github_username = process.env.GITHUB_USERNAME;
+  if (!github_username) throw new Error("Missing GITHUB_USERNAME");
+
+  const github_calendar = await fetchGitHubActivity(github_username, token);
+
   return (
     <>
       <Hero
@@ -9,13 +21,13 @@ export default function Page() {
         title="Zachary Cervenka"
         body={
           <p>
-            A software engineer passionate about building modern web
-            applications.
+            A software engineer dedicated to creating modern web experiences and
+            transforming data into meaningful insights.
           </p>
         }
         image={{
           url: "/hero-image.png",
-          alt: "Illustration of people building something",
+          alt: "Illustration of a cartoon character of Zachary Cervenka working on a laptop",
           asset: {
             metadata: {
               dimensions: { width: 800, height: 600 },
@@ -106,6 +118,9 @@ export default function Page() {
           },
         ]}
       />
+      <GitHubActivity {...github_calendar} />
+      <ProjectsSkills />
+      <BlogPreview />
     </>
   );
 }
