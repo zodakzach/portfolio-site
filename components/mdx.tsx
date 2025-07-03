@@ -49,8 +49,17 @@ function RoundedImage(props) {
 }
 
 function Code({ children, ...props }) {
-  let codeHTML = highlight(children);
-  return <code dangerouslySetInnerHTML={{ __html: codeHTML }} {...props} />;
+  const codeHTML = highlight(children);
+
+  return (
+    <pre className="overflow-x-auto rounded-md bg-gray-100 p-4 whitespace-pre">
+      <code
+        className="block"
+        dangerouslySetInnerHTML={{ __html: codeHTML }}
+        {...props}
+      />
+    </pre>
+  );
 }
 
 function slugify(str) {
