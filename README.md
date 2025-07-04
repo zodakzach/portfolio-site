@@ -1,42 +1,67 @@
-# Portfolio Blog Starter
+# My Portfolio Site
 
-This is a porfolio site template complete with a blog. Includes:
+This is my personal portfolio site, featuring a blog, project showcase, and a contact form with email notifications.
 
-- MDX and Markdown support
-- Optimized for SEO (sitemap, robots, JSON-LD schema)
-- RSS Feed
-- Dynamic OG images
-- Syntax highlighting
-- Tailwind v4
-- Vercel Speed Insights / Web Analytics
-- Geist font
+## Features
+
+- **MDX and Markdown blog posts**
+- **SEO optimization (sitemap, robots, JSON-LD schema)**
+- **RSS Feed**
+- **Dynamic OG images**
+- **Syntax highlighting**
+- **[Tailwind CSS v4](https://tailwindcss.com/docs/upgrade-guide)** – official upgrade guide and docs
+- **[Vercel Speed Insights / Web Analytics](https://vercel.com/docs/concepts/analytics/overview)** – built‑in performance and analytics in Vercel
+- **[Geist font](https://vercel.com/design/geist)** – Vercel’s official typeface
+- **[Motion Animations](https://motion.dev)** – smooth animations with Motion.dev
+- **[Shadcn Components](https://ui.shadcn.com/)** – Tailwind + React component library
+- **Fully functioning contact form powered by [Resend](https://resend.com/docs/send-with-nextjs)** with reCAPTCHA verification
+
+## Tech Stack
+
+- [Next.js](https://nextjs.org/) (App Router)
+- [Tailwind CSS v4](https://tailwindcss.com/)
+- [Shadcn UI](https://ui.shadcn.com/)
+- [Resend](https://resend.com/) email delivery
+- [Motion.dev](https://motion.dev/) for animations
+- [Vercel](https://vercel.com/) deployment and analytics
 
 ## Demo
 
-https://portfolio-blog-starter.vercel.app
+[View Live Site](https://zodakzach-portfolio.vercel.app)
 
-## How to Use
+## Installation
 
-You can choose from one of the following two methods to use this repository:
-
-### One-Click Deploy
-
-Deploy the example using [Vercel](https://vercel.com?utm_source=github&utm_medium=readme&utm_campaign=vercel-examples):
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/vercel/examples/tree/main/solutions/blog&project-name=blog&repository-name=blog)
-
-### Clone and Deploy
-
-Execute [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app) with [pnpm](https://pnpm.io/installation) to bootstrap the example:
+Clone the repository and install dependencies:
 
 ```bash
-pnpm create next-app --example https://github.com/vercel/examples/tree/main/solutions/blog blog
+git clone https://github.com/zodakzach/portfolio-site.git
+cd portfolio-site
+npm install
 ```
 
-Then, run Next.js in development mode:
+## Running Locally
+
+Start the development server:
 
 ```bash
-pnpm dev
+npm run dev
 ```
 
-Deploy it to the cloud with [Vercel](https://vercel.com/templates) ([Documentation](https://nextjs.org/docs/app/building-your-application/deploying)).
+Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+## Building for Production
+
+To build and start the app in production mode:
+
+```bash
+npm run build
+npm start
+```
+
+## Deployment
+
+This site is deployed with [Vercel](https://vercel.com/). For more details, see the [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying).
+
+---
+
+Thank you for checking out my portfolio site!
