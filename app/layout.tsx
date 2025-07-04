@@ -9,6 +9,7 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import Footer from "@/components/footer";
 import { baseUrl } from "./sitemap";
 import { cn } from "@/lib/utils";
+import { Toaster } from "@/components/ui/sonner";
 
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),
@@ -59,6 +60,11 @@ export default function RootLayout({
             <Header />
             {children}
             <Footer />
+            <Toaster
+              position="top-right"
+              richColors
+              visibleToasts={3} // max simultaneous toasts
+            />
             <Analytics />
             <SpeedInsights />
           </main>
