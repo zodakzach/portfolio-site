@@ -86,25 +86,27 @@ export default function GitHubActivity({
         <CardHeader>
           <CardTitle>Contribution Calendar ({year})</CardTitle>
         </CardHeader>
-        <CardContent>
-          <CalendarHeatmap
-            startDate={new Date(year, 0, 1)}
-            endDate={new Date(year, 11, 31)}
-            values={daysForYear.map((d) => ({
-              date: d.date,
-              count: d.contributionCount,
-            }))}
-            classForValue={(value) => {
-              if (!value || value.count === 0) return "fill-background";
-              if (value.count < 5) return "fill-primary/20";
-              if (value.count < 10) return "fill-primary/40";
-              return "fill-primary";
-            }}
-            tooltipDataAttrs={(value) => ({
-              "data-tip": `${value.date}: ${value.count} contributions`,
-            })}
-            showWeekdayLabels
-          />
+        <CardContent className="overflow-x-auto lg:overflow-x-visible">
+          <div className="min-w-[700px]">
+            <CalendarHeatmap
+              startDate={new Date(year, 0, 1)}
+              endDate={new Date(year, 11, 31)}
+              values={daysForYear.map((d) => ({
+                date: d.date,
+                count: d.contributionCount,
+              }))}
+              classForValue={(value) => {
+                if (!value || value.count === 0) return "fill-background";
+                if (value.count < 5) return "fill-primary/30";
+                if (value.count < 10) return "fill-primary/60";
+                return "fill-primary";
+              }}
+              tooltipDataAttrs={(value) => ({
+                "data-tip": `${value.date}: ${value.count} contributions`,
+              })}
+              showWeekdayLabels
+            />
+          </div>
         </CardContent>
       </Card>
     </section>
