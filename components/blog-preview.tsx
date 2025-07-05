@@ -1,20 +1,32 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Calendar, Clock, ArrowRight } from "lucide-react";
 import Link from "next/link";
-import { formatDate, getBlogPosts } from "app/blog/utils";
+import { Button } from "@/components/ui/button";
+import { ArrowRight } from "lucide-react";
+import { getBlogPosts } from "app/blog/utils";
+import GridPost, { GridPostData } from "@/components/post-card";
 
 export default function BlogPreview() {
+  // 1) load + sort + take 3 most recent
   const allBlogs = getBlogPosts();
   const recentPosts = allBlogs
-    .sort((a, b) => {
-      if (new Date(a.metadata.publishedAt) > new Date(b.metadata.publishedAt)) {
-        return -1;
-      }
-      return 1;
-    })
+    .sort(
+      (a, b) =>
+        new Date(b.metadata.publishedAt).getTime() -
+        new Date(a.metadata.publishedAt).getTime(),
+    )
     .slice(0, 3);
+
+  // 2) map into the shape GridPost expects
+  const recentGridPosts: GridPostData[] = recentPosts.map(
+    ({ metadata, slug }) => ({
+      title: metadata.title,
+      slug: { current: slug },
+      excerpt: metadata.summary,
+      image: metadata.image
+        ? { src: metadata.image, alt: metadata.title, lqip: undefined }
+        : undefined,
+      categories: metadata.categories ?? [],
+    }),
+  );
 
   return (
     <section className="bg-muted dark:bg-muted/30">
@@ -30,44 +42,8 @@ export default function BlogPreview() {
         </div>
 
         <div className="mb-8 grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
-          {recentPosts.map((post) => (
-            <Card
-              key={post.slug}
-              className="group bg-background dark:bg-card transition-shadow hover:shadow-lg"
-            >
-              <CardHeader>
-                <div className="text-muted-foreground mb-2 flex items-center gap-2 text-sm">
-                  <Calendar className="h-4 w-4" />
-                  {formatDate(post.metadata.publishedAt)}
-                  <Clock className="ml-2 h-4 w-4" />5 min read
-                </div>
-                <CardTitle className="group-hover:text-primary transition-colors">
-                  <Link href={`/blog/${post.slug}`}>{post.metadata.title}</Link>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground mb-4 line-clamp-3">
-                  {post.metadata.summary}
-                </p>
-                <div className="flex items-center justify-between">
-                  <Badge variant="secondary">
-                    {post.slug.includes("typescript")
-                      ? "TypeScript"
-                      : post.slug.includes("vim")
-                        ? "Tools"
-                        : post.slug.includes("spaces")
-                          ? "Best Practices"
-                          : "Development"}
-                  </Badge>
-                  <Button variant="ghost" size="sm" asChild>
-                    <Link href={`/blog/${post.slug}`}>
-                      Read more
-                      <ArrowRight className="ml-2 h-4 w-4" />
-                    </Link>
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+          {recentGridPosts.map((post) => (
+            <GridPost key={post.slug.current} post={post} />
           ))}
         </div>
 

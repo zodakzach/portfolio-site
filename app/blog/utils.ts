@@ -1,27 +1,56 @@
 import fs from "fs";
 import path from "path";
 
-type Metadata = {
+export type Metadata = {
   title: string;
   publishedAt: string;
   summary: string;
   image?: string;
+  categories?: string[];
 };
 
 function parseFrontmatter(fileContent: string) {
-  let frontmatterRegex = /---\s*([\s\S]*?)\s*---/;
-  let match = frontmatterRegex.exec(fileContent);
-  let frontMatterBlock = match![1];
-  let content = fileContent.replace(frontmatterRegex, "").trim();
-  let frontMatterLines = frontMatterBlock.trim().split("\n");
-  let metadata: Partial<Metadata> = {};
+  const frontmatterRegex = /---\s*([\s\S]*?)\s*---/;
+  const match = frontmatterRegex.exec(fileContent);
+  if (!match) {
+    throw new Error("No frontmatter found");
+  }
 
-  frontMatterLines.forEach((line) => {
-    let [key, ...valueArr] = line.split(": ");
-    let value = valueArr.join(": ").trim();
-    value = value.replace(/^['"](.*)['"]$/, "$1"); // Remove quotes
-    metadata[key.trim() as keyof Metadata] = value;
-  });
+  const frontMatterBlock = match[1];
+  const content = fileContent.replace(frontmatterRegex, "").trim();
+
+  const lines = frontMatterBlock.split(/\r?\n/);
+  const metadata: Partial<Metadata> = {};
+
+  let currentKey: keyof Metadata | null = null;
+  for (let raw of lines) {
+    const line = raw.trim();
+    // 1) Key with inline value: e.g. "title: Hello"
+    let m = line.match(/^([A-Za-z0-9_]+):\s*(.*)$/);
+    if (m) {
+      const [, key, val] = m;
+      if (val === "") {
+        // start of a list block
+        currentKey = key as keyof Metadata;
+        (metadata[currentKey] as any) = [];
+      } else {
+        // scalar value
+        let v = val.replace(/^['"](.*)['"]$/, "$1");
+        // convert to number/boolean if you like, but here keep strings
+        (metadata[key as keyof Metadata] as any) = v;
+        currentKey = null;
+      }
+    }
+    // 2) List item under currentKey
+    else if (currentKey && line.startsWith("- ")) {
+      const item = line
+        .slice(2)
+        .trim()
+        .replace(/^['"](.*)['"]$/, "$1");
+      (metadata[currentKey] as any[]).push(item);
+    }
+    // else ignore stray lines
+  }
 
   return { metadata: metadata as Metadata, content };
 }
