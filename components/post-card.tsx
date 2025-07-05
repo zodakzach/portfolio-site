@@ -29,7 +29,7 @@ export default function GridPost({ post }: GridPostProps) {
       href={`/blog/${slug.current}`}
       className="ring-offset-background focus-visible:ring-ring group flex w-full rounded-3xl focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-hidden"
     >
-      <div className="group hover:border-primary flex w-full flex-col justify-between overflow-hidden rounded-3xl border p-4 transition ease-in-out">
+      <div className="group bg-card text-card-foreground hover:border-primary flex w-full flex-col justify-between overflow-hidden rounded-3xl border p-4 shadow-md transition ease-in-out">
         <div className="flex flex-col">
           {image?.src && (
             <div className="relative mb-4 h-[15rem] overflow-hidden rounded-2xl sm:h-[20rem] md:h-[25rem] lg:h-[9.5rem] xl:h-[12rem]">
