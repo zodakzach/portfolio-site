@@ -18,30 +18,30 @@ export default function GitHubActivity({
 }: {
   calendar: ContributionCalendar;
 }) {
-  // 1) flatten all weeks → days
+  // flatten weeks → days
   const allDays: ContributionDay[] = useMemo(
     () => calendar.weeks.flatMap((w) => w.contributionDays),
     [calendar],
   );
 
-  // 2) compute the unique years present, sorted desc
+  // unique years, sorted desc
   const years = useMemo(() => {
     const s = new Set(allDays.map((d) => new Date(d.date).getFullYear()));
     return Array.from(s).sort((a, b) => b - a);
   }, [allDays]);
 
-  // 3) selected year state (default to most recent)
+  // selected year state
   const [year, setYear] = useState<number>(
     years[0] || new Date().getFullYear(),
   );
 
-  // 4) filter days down to that year
+  // days for that year
   const daysForYear = useMemo(
     () => allDays.filter((d) => new Date(d.date).getFullYear() === year),
     [allDays, year],
   );
 
-  // stats
+  // total commits
   const totalCommits = daysForYear.reduce(
     (sum, d) => sum + d.contributionCount,
     0,
@@ -52,8 +52,6 @@ export default function GitHubActivity({
       {/* Header */}
       <div className="mb-8 flex items-center justify-between">
         <h2 className="text-3xl font-bold">GitHub Activity</h2>
-        {/* Year selector */}
-        {/* shadcn/ui Select */}
         <Select
           value={String(year)}
           onValueChange={(val) => setYear(Number(val))}
@@ -81,13 +79,13 @@ export default function GitHubActivity({
         </CardContent>
       </Card>
 
-      {/* Heatmap Calendar */}
-      <Card>
+      {/* Heatmap Calendar with browser-native tooltip */}
+      <Card className="px-2">
         <CardHeader>
           <CardTitle>Contribution Calendar ({year})</CardTitle>
         </CardHeader>
-        <CardContent className="overflow-x-auto lg:overflow-x-visible">
-          <div className="min-w-[700px]">
+        <CardContent className="overflow-x-auto">
+          <div className="min-w-[1024px]">
             <CalendarHeatmap
               startDate={new Date(year, 0, 1)}
               endDate={new Date(year, 11, 31)}
@@ -101,10 +99,21 @@ export default function GitHubActivity({
                 if (value.count < 10) return "fill-primary/60";
                 return "fill-primary";
               }}
-              tooltipDataAttrs={(value) => ({
-                "data-tip": `${value.date}: ${value.count} contributions`,
-              })}
               showWeekdayLabels
+              titleForValue={(value) => {
+                if (!value || !value.date) return "No contributions";
+                const date = new Date(value.date).toLocaleDateString(
+                  undefined,
+                  {
+                    weekday: "short",
+                    month: "short",
+                    day: "numeric",
+                    year: "numeric",
+                  },
+                );
+                const count = value.count;
+                return `${date}: ${count} contribution${count === 1 ? "" : "s"}`;
+              }}
             />
           </div>
         </CardContent>
