@@ -90,9 +90,14 @@ export default function ContactForm() {
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Name</FormLabel>
+              <FormLabel htmlFor="contact-name">Name</FormLabel>
               <FormControl>
-                <Input placeholder="Your name" autoComplete="name" {...field} />
+                <Input
+                  id="contact-name"
+                  placeholder="Your name"
+                  autoComplete="name"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -105,9 +110,10 @@ export default function ContactForm() {
           name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Email</FormLabel>
+              <FormLabel htmlFor="contact-email">Email</FormLabel>
               <FormControl>
                 <Input
+                  id="contact-email"
                   placeholder="you@example.com"
                   autoComplete="email"
                   type="email"
@@ -125,9 +131,10 @@ export default function ContactForm() {
           name="message"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Message</FormLabel>
+              <FormLabel htmlFor="contact-message">Message</FormLabel>
               <FormControl>
                 <Textarea
+                  id="contact-message"
                   placeholder="Tell me about your project..."
                   className="min-h-[120px]"
                   autoComplete="off"
