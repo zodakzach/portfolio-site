@@ -92,7 +92,7 @@ export default function ContactForm() {
             <FormItem>
               <FormLabel>Name</FormLabel>
               <FormControl>
-                <Input placeholder="Your name" {...field} />
+                <Input placeholder="Your name" autoComplete="name" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -107,7 +107,12 @@ export default function ContactForm() {
             <FormItem>
               <FormLabel>Email</FormLabel>
               <FormControl>
-                <Input placeholder="you@example.com" type="email" {...field} />
+                <Input
+                  placeholder="you@example.com"
+                  autoComplete="email"
+                  type="email"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -125,6 +130,7 @@ export default function ContactForm() {
                 <Textarea
                   placeholder="Tell me about your project..."
                   className="min-h-[120px]"
+                  autoComplete="off"
                   {...field}
                 />
               </FormControl>

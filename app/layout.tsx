@@ -10,6 +10,7 @@ import Footer from "@/components/footer";
 import { baseUrl } from "./sitemap";
 import { cn } from "@/lib/utils";
 import { Toaster } from "@/components/ui/sonner";
+import "react-calendar-heatmap/dist/styles.css";
 
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),

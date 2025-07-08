@@ -2,7 +2,6 @@
 
 import { useState, useMemo } from "react";
 import CalendarHeatmap from "react-calendar-heatmap";
-import "react-calendar-heatmap/dist/styles.css";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import type { ContributionCalendar, ContributionDay } from "@/types";
 import {
