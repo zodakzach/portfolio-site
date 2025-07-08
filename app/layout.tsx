@@ -14,17 +14,42 @@ import { Toaster } from "@/components/ui/sonner";
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),
   title: {
-    default: "Zachary Cervenka | Portfolio",
-    template: "%s | Portfolio",
+    default: "Zachary Cervenka | Full-Stack Developer & Software Engineer",
+    template: "%s | Zachary Cervenka",
   },
-  description: "This is my portfolio.",
+  description:
+    "Full-stack developer specializing in React, Next.js, Python, and modern web technologies. View my projects and blog posts about software development.",
+  keywords: [
+    "software engineer",
+    "full-stack developer",
+    "React",
+    "Next.js",
+    "Python",
+    "web development",
+  ],
+  authors: [{ name: "Zachary Cervenka" }],
+  creator: "Zachary Cervenka",
   openGraph: {
-    title: "My Portfolio",
-    description: "This is my portfolio.",
+    title: "Zachary Cervenka | Full-Stack Developer",
+    description: "Full-stack developer specializing in modern web technologies",
     url: baseUrl,
-    siteName: "My Portfolio",
+    siteName: "Zachary Cervenka Portfolio",
+    images: [
+      {
+        url: "/og-image.png", // Create a custom OG image
+        width: 1200,
+        height: 630,
+        alt: "Zachary Cervenka - Full-Stack Developer",
+      },
+    ],
     locale: "en_US",
     type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Zachary Cervenka | Full-Stack Developer",
+    description: "Full-stack developer specializing in modern web technologies",
+    images: ["/og-image.png"],
   },
   robots: {
     index: true,
@@ -38,6 +63,7 @@ export const metadata: Metadata = {
     },
   },
 };
+
 export default function RootLayout({
   children,
 }: {

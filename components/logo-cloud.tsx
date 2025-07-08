@@ -30,7 +30,7 @@ export default function LogoCloud({ title, images = [] }: LogoCloudProps) {
   }
 
   return (
-    <section className="bg-background container mx-auto overflow-hidden px-4 py-8 lg:px-24 lg:py-12">
+    <section className="bg-background container mx-auto overflow-hidden px-4 py-8 lg:px-16 lg:py-12">
       {title && (
         <h2 className="animate-fade-up mb-4 text-center text-lg font-medium tracking-tighter opacity-0 [animation-delay:100ms]">
           {title}

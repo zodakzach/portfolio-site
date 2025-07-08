@@ -5,6 +5,9 @@ import LogoCloud from "@/components/logo-cloud";
 import ProjectsSkills from "@/components/project-skills";
 import { fetchGitHubActivity } from "@/lib/github";
 
+// Daily revalidation - data refreshes once per day
+export const revalidate = 86400; // 24 hours in seconds
+
 export default async function Page() {
   const token = process.env.GITHUB_TOKEN;
   if (!token) throw new Error("Missing GITHUB_TOKEN");

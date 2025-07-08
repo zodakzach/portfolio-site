@@ -18,7 +18,15 @@ export default function GitHubActivity({
 }: {
   calendar: ContributionCalendar;
 }) {
-  // flatten weeks → days
+  // Helper function to parse date consistently
+  const parseDate = (dateString: string) => {
+    // GitHub returns dates in YYYY-MM-DD format
+    // Parse as local date to avoid timezone shifts
+    const [year, month, day] = dateString.split("-").map(Number);
+    return new Date(year, month - 1, day);
+  };
+
+  // flatten weeks → days with proper date parsing
   const allDays: ContributionDay[] = useMemo(
     () => calendar.weeks.flatMap((w) => w.contributionDays),
     [calendar],
@@ -26,7 +34,7 @@ export default function GitHubActivity({
 
   // unique years, sorted desc
   const years = useMemo(() => {
-    const s = new Set(allDays.map((d) => new Date(d.date).getFullYear()));
+    const s = new Set(allDays.map((d) => parseDate(d.date).getFullYear()));
     return Array.from(s).sort((a, b) => b - a);
   }, [allDays]);
 
@@ -37,7 +45,7 @@ export default function GitHubActivity({
 
   // days for that year
   const daysForYear = useMemo(
-    () => allDays.filter((d) => new Date(d.date).getFullYear() === year),
+    () => allDays.filter((d) => parseDate(d.date).getFullYear() === year),
     [allDays, year],
   );
 
@@ -79,7 +87,7 @@ export default function GitHubActivity({
         </CardContent>
       </Card>
 
-      {/* Heatmap Calendar with browser-native tooltip */}
+      {/* Heatmap Calendar */}
       <Card className="px-2">
         <CardHeader>
           <CardTitle>Contribution Calendar ({year})</CardTitle>
@@ -90,7 +98,7 @@ export default function GitHubActivity({
               startDate={new Date(year, 0, 1)}
               endDate={new Date(year, 11, 31)}
               values={daysForYear.map((d) => ({
-                date: d.date,
+                date: d.date, // Keep original string format
                 count: d.contributionCount,
               }))}
               classForValue={(value) => {
@@ -102,7 +110,8 @@ export default function GitHubActivity({
               showWeekdayLabels
               titleForValue={(value) => {
                 if (!value || !value.date) return "No contributions";
-                const date = new Date(value.date).toLocaleDateString(
+                // Parse date properly for display
+                const date = parseDate(value.date).toLocaleDateString(
                   undefined,
                   {
                     weekday: "short",
