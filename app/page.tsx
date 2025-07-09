@@ -1,4 +1,5 @@
 import BlogPreview from "@/components/blog-preview";
+import ContactSection from "@/components/contact-section";
 import GitHubActivity from "@/components/github-activity";
 import Hero from "@/components/hero";
 import LogoCloud from "@/components/logo-cloud";
@@ -124,6 +125,7 @@ export default async function Page() {
       <GitHubActivity {...github_calendar} />
       <ProjectsSkills />
       <BlogPreview />
+      <ContactSection />
     </>
   );
 }
