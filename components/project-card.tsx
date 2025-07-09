@@ -4,16 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Github, Globe } from "lucide-react";
-
-export interface Project {
-  id: string;
-  title: string;
-  image: string;
-  githubUrl: string;
-  liveUrl: string;
-  description: string;
-  technologies: string[];
-}
+import { Project } from "@/data/projects";
 
 interface ProjectCardProps {
   project: Project;
@@ -37,24 +28,28 @@ export default function ProjectCard({ project }: ProjectCardProps) {
         <CardTitle className="flex items-center justify-between">
           {project.title}
           <div className="flex gap-2">
-            <Button variant="ghost" size="icon" asChild>
-              <Link
-                href={project.githubUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <Github className="h-4 w-4" />
-              </Link>
-            </Button>
-            <Button variant="ghost" size="icon" asChild>
-              <Link
-                href={project.liveUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <Globe className="h-4 w-4" />
-              </Link>
-            </Button>
+            {project.githubUrl && (
+              <Button variant="ghost" size="icon" asChild>
+                <Link
+                  href={project.githubUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Github className="h-4 w-4" />
+                </Link>
+              </Button>
+            )}
+            {project.liveUrl && (
+              <Button variant="ghost" size="icon" asChild>
+                <Link
+                  href={project.liveUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Globe className="h-4 w-4" />
+                </Link>
+              </Button>
+            )}
           </div>
         </CardTitle>
       </CardHeader>
