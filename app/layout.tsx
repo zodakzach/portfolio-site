@@ -76,6 +76,7 @@ export default function RootLayout({
       className={cn(GeistSans.variable, GeistMono.variable)}
       suppressHydrationWarning
     >
+      <link rel="icon" href="/favicon.ico" />
       <body className="bg-background text-foreground mx-auto overscroll-none antialiased">
         <ThemeProvider
           attribute="class"
