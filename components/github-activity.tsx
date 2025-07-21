@@ -54,6 +54,8 @@ export default function GitHubActivity({
 
   const { currentStreak, longestStreak, longestStreakStart, longestStreakEnd } =
     useMemo(() => {
+      const today = new Date();
+
       const sorted = daysForYear
         .map((d) => ({ date: parseDate(d.date), count: d.contributionCount }))
         .sort((a, b) => a.date.getTime() - b.date.getTime());
@@ -79,9 +81,10 @@ export default function GitHubActivity({
         }
       }
 
+      const pastDays = sorted.filter(({ date }) => date <= today);
       let current = 0;
-      for (let i = sorted.length - 1; i >= 0; i--) {
-        if (sorted[i].count > 0) current++;
+      for (let i = pastDays.length - 1; i >= 0; i--) {
+        if (pastDays[i].count > 0) current++;
         else break;
       }
 
