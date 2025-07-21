@@ -4,19 +4,16 @@ import GitHubActivity from "@/components/github-activity";
 import Hero from "@/components/hero";
 import LogoCloud from "@/components/logo-cloud";
 import ProjectsSkills from "@/components/project-skills";
-import { fetchGitHubActivity } from "@/lib/github";
+import { fetchGitHubActivity, fetchMostUsedLanguages } from "@/lib/github";
 
 // Daily revalidation - data refreshes once per day
 export const revalidate = 86400; // 24 hours in seconds
 
 export default async function Page() {
-  const token = process.env.GITHUB_TOKEN;
-  if (!token) throw new Error("Missing GITHUB_TOKEN");
-
-  const github_username = process.env.GITHUB_USERNAME;
-  if (!github_username) throw new Error("Missing GITHUB_USERNAME");
-
-  const github_calendar = await fetchGitHubActivity(github_username, token);
+  const [github_calendar, mostUsedLanguages] = await Promise.all([
+    fetchGitHubActivity(),
+    fetchMostUsedLanguages(),
+  ]);
 
   return (
     <>
@@ -122,7 +119,10 @@ export default async function Page() {
           },
         ]}
       />
-      <GitHubActivity {...github_calendar} />
+      <GitHubActivity
+        calendar={github_calendar}
+        topLanguages={mostUsedLanguages}
+      />
       <ProjectsSkills />
       <BlogPreview />
       <ContactSection />

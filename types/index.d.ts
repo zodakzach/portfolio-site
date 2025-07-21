@@ -18,3 +18,11 @@ export interface GitHubStats {
   totalCommits: number;
   contributionsThisYear: number;
 }
+
+export interface LanguageStat {
+  language: string;
+  bytes: number;
+}
+
+// an array of those
+export type LanguageStats = LanguageStat[];

@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react";
 import CalendarHeatmap from "react-calendar-heatmap";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import type { ContributionCalendar, ContributionDay } from "@/types";
+import type { ContributionCalendar, LanguageStat } from "@/types";
 import {
   Select,
   SelectContent,
@@ -11,52 +11,112 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./ui/select";
+import { Progress } from "./ui/progress";
+import { Flame } from "lucide-react";
+
+interface GitHubActivityProps {
+  calendar: ContributionCalendar;
+  topLanguages: LanguageStat[];
+}
 
 export default function GitHubActivity({
   calendar,
-}: {
-  calendar: ContributionCalendar;
-}) {
-  // Helper function to parse date consistently
+  topLanguages,
+}: GitHubActivityProps) {
   const parseDate = (dateString: string) => {
-    // GitHub returns dates in YYYY-MM-DD format
-    // Parse as local date to avoid timezone shifts
     const [year, month, day] = dateString.split("-").map(Number);
     return new Date(year, month - 1, day);
   };
 
-  // flatten weeks → days with proper date parsing
-  const allDays: ContributionDay[] = useMemo(
+  const allDays = useMemo(
     () => calendar.weeks.flatMap((w) => w.contributionDays),
     [calendar],
   );
 
-  // unique years, sorted desc
   const years = useMemo(() => {
     const s = new Set(allDays.map((d) => parseDate(d.date).getFullYear()));
     return Array.from(s).sort((a, b) => b - a);
   }, [allDays]);
 
-  // selected year state
   const [year, setYear] = useState<number>(
     years[0] || new Date().getFullYear(),
   );
 
-  // days for that year
   const daysForYear = useMemo(
     () => allDays.filter((d) => parseDate(d.date).getFullYear() === year),
     [allDays, year],
   );
 
-  // total commits
   const totalCommits = daysForYear.reduce(
     (sum, d) => sum + d.contributionCount,
     0,
   );
 
+  const { currentStreak, longestStreak, longestStreakStart, longestStreakEnd } =
+    useMemo(() => {
+      const sorted = daysForYear
+        .map((d) => ({ date: parseDate(d.date), count: d.contributionCount }))
+        .sort((a, b) => a.date.getTime() - b.date.getTime());
+
+      let longest = 0,
+        run = 0;
+      let runStart: Date | null = null,
+        bestStart: Date | null = null,
+        bestEnd: Date | null = null;
+
+      for (const { date, count } of sorted) {
+        if (count > 0) {
+          run++;
+          runStart = runStart || date;
+          if (run > longest) {
+            longest = run;
+            bestStart = runStart;
+            bestEnd = date;
+          }
+        } else {
+          run = 0;
+          runStart = null;
+        }
+      }
+
+      let current = 0;
+      for (let i = sorted.length - 1; i >= 0; i--) {
+        if (sorted[i].count > 0) current++;
+        else break;
+      }
+
+      return {
+        currentStreak: current,
+        longestStreak: longest,
+        longestStreakStart: bestStart,
+        longestStreakEnd: bestEnd,
+      };
+    }, [daysForYear]);
+
+  const progressValue =
+    longestStreak > 0
+      ? Math.min((currentStreak / longestStreak) * 100, 100)
+      : currentStreak > 0
+        ? 100
+        : 0;
+
+  const excluded = ["Jupyter Notebook", "ASP.NET"];
+  const filteredLangs = useMemo(
+    () => topLanguages.filter((lang) => !excluded.includes(lang.language)),
+    [topLanguages],
+  );
+
+  // now slice the top 5 of the filtered list
+  const top5 = useMemo(() => filteredLangs.slice(0, 5), [filteredLangs]);
+  //  Calculate sum of Top 5 bytes
+  const totalBytes = useMemo(
+    () => top5.reduce((sum, l) => sum + l.bytes, 0),
+    [top5],
+  );
+
   return (
     <section className="container mx-auto px-4 py-16 lg:px-16 lg:py-20">
-      {/* Header */}
+      {/* Header + Year Selector */}
       <div className="mb-8 flex items-center justify-between">
         <h2 className="text-3xl font-bold">GitHub Activity</h2>
         <Select
@@ -76,18 +136,54 @@ export default function GitHubActivity({
         </Select>
       </div>
 
-      {/* Stat Card */}
+      {/* Stats */}
       <Card className="mb-8 py-0 md:py-8">
         <CardContent className="p-6 text-center">
-          <div className="mb-1 text-2xl font-bold">{totalCommits}</div>
-          <div className="text-muted-foreground text-sm">
-            Total Commits in {year}
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3">
+            {/* Total Commits */}
+            <div className="space-y-1">
+              <div className="text-2xl font-bold">{totalCommits}</div>
+              <div className="text-muted-foreground text-sm">Total Commits</div>
+            </div>
+
+            {/* Current Streak */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-center space-x-2">
+                <Flame className="h-5 w-5 text-rose-500" />
+                <span className="text-2xl font-bold">{currentStreak} days</span>
+              </div>
+              <div className="text-muted-foreground text-sm">
+                Current Streak
+              </div>
+              <Progress value={progressValue} className="h-2" />
+            </div>
+
+            {/* Longest Streak */}
+            <div className="space-y-1">
+              <div className="text-2xl font-bold">{longestStreak} days</div>
+              <div className="text-muted-foreground text-sm">
+                Longest Streak
+              </div>
+              {longestStreakStart && longestStreakEnd && (
+                <div className="text-muted-foreground text-xs">
+                  {longestStreakStart.toLocaleDateString(undefined, {
+                    month: "short",
+                    day: "numeric",
+                  })}{" "}
+                  –{" "}
+                  {longestStreakEnd.toLocaleDateString(undefined, {
+                    month: "short",
+                    day: "numeric",
+                  })}
+                </div>
+              )}
+            </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Heatmap Calendar */}
-      <Card className="px-2">
+      {/* Heatmap */}
+      <Card className="mb-8 px-2">
         <CardHeader>
           <CardTitle>Contribution Calendar ({year})</CardTitle>
         </CardHeader>
@@ -97,33 +193,50 @@ export default function GitHubActivity({
               startDate={new Date(year, 0, 1)}
               endDate={new Date(year, 11, 31)}
               values={daysForYear.map((d) => ({
-                date: d.date, // Keep original string format
+                date: d.date,
                 count: d.contributionCount,
               }))}
-              classForValue={(value) => {
-                if (!value || value.count === 0) return "fill-background";
-                if (value.count < 5) return "fill-primary/30";
-                if (value.count < 10) return "fill-primary/60";
+              classForValue={(v) => {
+                if (!v || v.count === 0) return "fill-background";
+                if (v.count < 5) return "fill-primary/30";
+                if (v.count < 10) return "fill-primary/60";
                 return "fill-primary";
               }}
               showWeekdayLabels
-              titleForValue={(value) => {
-                if (!value || !value.date) return "No contributions";
-                // Parse date properly for display
-                const date = parseDate(value.date).toLocaleDateString(
-                  undefined,
-                  {
-                    weekday: "short",
-                    month: "short",
-                    day: "numeric",
-                    year: "numeric",
-                  },
-                );
-                const count = value.count;
-                return `${date}: ${count} contribution${count === 1 ? "" : "s"}`;
+              titleForValue={(v) => {
+                if (!v?.date) return "No contributions";
+                const date = parseDate(v.date).toLocaleDateString(undefined, {
+                  weekday: "short",
+                  month: "short",
+                  day: "numeric",
+                  year: "numeric",
+                });
+                return `${date}: ${v.count} contribution${v.count === 1 ? "" : "s"}`;
               }}
             />
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Top 5 Languages */}
+      <Card className="px-4 py-6">
+        <CardHeader>
+          <CardTitle>Top 5 Most Used Languages</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {top5.map(({ language, bytes }) => {
+            // compute each as a percentage of the Top 5 total
+            const pct = totalBytes > 0 ? (bytes / totalBytes) * 100 : 0;
+            return (
+              <div key={language} className="space-y-1">
+                <div className="flex justify-between text-sm font-medium">
+                  <span>{language}</span>
+                  <span>{pct.toFixed(1)}%</span>
+                </div>
+                <Progress value={Math.round(pct)} className="h-2" />
+              </div>
+            );
+          })}
         </CardContent>
       </Card>
     </section>

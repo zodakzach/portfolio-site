@@ -1,16 +1,17 @@
+// lib/github.ts
 import { graphql } from "@octokit/graphql";
-import type { ContributionCalendar } from "@/types";
+import type { ContributionCalendar, LanguageStats } from "@/types";
 
-/**
- * Fetches ALL GitHub contributions across each calendar year from a minimum start
- * year up to the current year, then combines them into a single calendar.
- * GitHub limits each contributionsCollection query to a 1-year span, so we chunk.
- */
-const YEARLY_QUERY = `
-  query ($username: String!, $from: DateTime!, $to: DateTime!) {
-    user(login: $username) {
+const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
+const GITHUB_USERNAME = process.env.GITHUB_USERNAME;
+
+if (!GITHUB_TOKEN) throw new Error("Missing GITHUB_TOKEN");
+if (!GITHUB_USERNAME) throw new Error("Missing GITHUB_USERNAME");
+
+const YEARLY_QUERY = /* GraphQL */ `
+  query ($from: DateTime!, $to: DateTime!) {
+    user(login: "${GITHUB_USERNAME}") {
       contributionsCollection(from: $from, to: $to) {
-        totalCommitContributions
         contributionCalendar {
           totalContributions
           weeks {
@@ -25,20 +26,14 @@ const YEARLY_QUERY = `
   }
 `;
 
-const GITHUB_ACCOUNT_START_YEAR = 2023; // earliest reliable data year
-
-export async function fetchGitHubActivity(
-  username: string,
-  token: string,
-): Promise<{ calendar: ContributionCalendar }> {
+export async function fetchGitHubActivity(): Promise<ContributionCalendar> {
   const now = new Date();
   const currentYear = now.getFullYear();
 
-  let totalCommits = 0;
-  let combinedWeeks: ContributionCalendar["weeks"] = [];
+  let totalContributions = 0;
+  let allWeeks: ContributionCalendar["weeks"] = [];
 
-  // Loop from account start year through current year
-  for (let year = GITHUB_ACCOUNT_START_YEAR; year <= currentYear; year++) {
+  for (let year = 2023; year <= currentYear; year++) {
     const from = new Date(year, 0, 1).toISOString();
     const to =
       year === currentYear
@@ -48,29 +43,83 @@ export async function fetchGitHubActivity(
     const { user } = await graphql<{
       user: {
         contributionsCollection: {
-          totalCommitContributions: number;
           contributionCalendar: ContributionCalendar;
         };
       };
     }>(YEARLY_QUERY, {
-      username,
       from,
       to,
-      headers: { authorization: `token ${token}` },
+      headers: { authorization: `token ${GITHUB_TOKEN}` },
     });
 
-    const { totalCommitContributions, contributionCalendar } =
-      user.contributionsCollection;
-
-    totalCommits += totalCommitContributions;
-    combinedWeeks.push(...contributionCalendar.weeks);
+    const { contributionCalendar } = user.contributionsCollection;
+    totalContributions += contributionCalendar.totalContributions;
+    allWeeks.push(...contributionCalendar.weeks);
   }
 
-  // Build a unified calendar
-  const calendar: ContributionCalendar = {
-    totalContributions: totalCommits,
-    weeks: combinedWeeks,
-  };
+  return { totalContributions, weeks: allWeeks };
+}
 
-  return { calendar };
+const LANGUAGES_QUERY = /* GraphQL */ `
+  query ($after: String) {
+    user(login: "${GITHUB_USERNAME}") {
+      repositories(
+        first: 100,
+        ownerAffiliations: OWNER,
+        isFork: false,
+        after: $after
+      ) {
+        pageInfo { hasNextPage endCursor }
+        nodes {
+          languages(first: 100, orderBy: { field: SIZE, direction: DESC }) {
+            edges {
+              size
+              node { name }
+            }
+          }
+        }
+      }
+    }
+  }
+`;
+
+export async function fetchMostUsedLanguages(): Promise<LanguageStats> {
+  const totals: Record<string, number> = {};
+  let hasNextPage = true;
+  let cursor: string | undefined = undefined;
+
+  while (hasNextPage) {
+    const resp = await graphql<{
+      user: {
+        repositories: {
+          pageInfo: { hasNextPage: boolean; endCursor: string };
+          nodes: Array<{
+            languages: {
+              edges: Array<{ size: number; node: { name: string } }>;
+            };
+          }>;
+        };
+      };
+    }>(LANGUAGES_QUERY, {
+      after: cursor,
+      headers: { authorization: `token ${GITHUB_TOKEN}` },
+    });
+
+    const {
+      pageInfo: { hasNextPage: next, endCursor },
+      nodes,
+    } = resp.user.repositories;
+    hasNextPage = next;
+    cursor = endCursor || undefined;
+
+    for (const repo of nodes) {
+      for (const { size, node } of repo.languages.edges) {
+        totals[node.name] = (totals[node.name] || 0) + size;
+      }
+    }
+  }
+
+  return Object.entries(totals)
+    .map(([language, bytes]) => ({ language, bytes }))
+    .sort((a, b) => b.bytes - a.bytes);
 }
