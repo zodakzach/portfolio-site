@@ -54,18 +54,43 @@ export default function GitHubActivity({
 
   const { currentStreak, longestStreak, longestStreakStart, longestStreakEnd } =
     useMemo(() => {
-      const today = new Date();
-      today.setDate(today.getDate() - 1); // Exclude today for streak calculations
+      const now = new Date();
+      const startOfToday = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate(),
+      );
 
+      // Map each day string to its commit count
+      const commitMap = new Map<string, number>();
+      daysForYear.forEach(({ date, contributionCount }) => {
+        const d = parseDate(date);
+        const key = d.toISOString().slice(0, 10);
+        commitMap.set(key, contributionCount);
+      });
+
+      const todayKey = startOfToday.toISOString().slice(0, 10);
+      const hasCommitToday = (commitMap.get(todayKey) ?? 0) > 0;
+
+      // If no commits today, roll end date back one day
+      const effectiveEndDate = hasCommitToday
+        ? startOfToday
+        : new Date(startOfToday.getTime() - 24 * 60 * 60 * 1000);
+
+      // Prepare sorted date/count array
       const sorted = daysForYear
-        .map((d) => ({ date: parseDate(d.date), count: d.contributionCount }))
+        .map(({ date, contributionCount }) => ({
+          date: parseDate(date),
+          count: contributionCount,
+        }))
         .sort((a, b) => a.date.getTime() - b.date.getTime());
 
-      let longest = 0,
-        run = 0;
-      let runStart: Date | null = null,
-        bestStart: Date | null = null,
-        bestEnd: Date | null = null;
+      // Find longest streak
+      let longest = 0;
+      let run = 0;
+      let runStart: Date | null = null;
+      let bestStart: Date | null = null;
+      let bestEnd: Date | null = null;
 
       for (const { date, count } of sorted) {
         if (count > 0) {
@@ -82,7 +107,8 @@ export default function GitHubActivity({
         }
       }
 
-      const pastDays = sorted.filter(({ date }) => date <= today);
+      // Compute current streak ending at effectiveEndDate
+      const pastDays = sorted.filter(({ date }) => date <= effectiveEndDate);
       let current = 0;
       for (let i = pastDays.length - 1; i >= 0; i--) {
         if (pastDays[i].count > 0) current++;
