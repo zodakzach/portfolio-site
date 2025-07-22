@@ -55,6 +55,7 @@ export default function GitHubActivity({
   const { currentStreak, longestStreak, longestStreakStart, longestStreakEnd } =
     useMemo(() => {
       const today = new Date();
+      today.setDate(today.getDate() - 1); // Exclude today for streak calculations
 
       const sorted = daysForYear
         .map((d) => ({ date: parseDate(d.date), count: d.contributionCount }))
