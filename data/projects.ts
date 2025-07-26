@@ -35,7 +35,7 @@ const projects: Project[] = [
     title: "YouTube Comments AI Analyzer",
     description:
       "A FastAPI web app that lets users input a YouTube video URL and receive an AI-generated summary and sentiment analysis of its comments. Uses HTMX for fast, interactive updates and includes a chat interface where users can ask questions, with answers powered by semantic search over relevant comments.",
-    image: "/yt-comments-ai.png", // Ensure this exists in your public folder
+    image: "/yt-comments-ai-analyzer.png", // Ensure this exists in your public folder
     technologies: ["FastAPI", "HTMX", "OpenAI", "Redis", "Jinja2", "Uvicorn"],
     githubUrl: "https://github.com/zodakzach/yt-comments-ai-analyzer",
     featured: true,
