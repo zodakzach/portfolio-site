@@ -37,7 +37,7 @@ export const metadata: Metadata = {
     siteName: "Zachary Cervenka Portfolio",
     images: [
       {
-        url: "/og-image.png", // Create a custom OG image
+        url: "/hero-image.png", // Create a custom OG image
         width: 1200,
         height: 630,
         alt: "Zachary Cervenka - Full-Stack Developer",
@@ -50,7 +50,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Zachary Cervenka | Full-Stack Developer",
     description: "Full-stack developer specializing in modern web technologies",
-    images: ["/og-image.png"],
+    images: ["/hero-image.png"],
   },
   robots: {
     index: true,
