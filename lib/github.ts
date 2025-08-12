@@ -1,16 +1,10 @@
-// lib/github.ts
 import { graphql } from "@octokit/graphql";
 import type { ContributionCalendar, LanguageStats } from "@/types";
-
-const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
-const GITHUB_USERNAME = process.env.GITHUB_USERNAME;
-
-if (!GITHUB_TOKEN) throw new Error("Missing GITHUB_TOKEN");
-if (!GITHUB_USERNAME) throw new Error("Missing GITHUB_USERNAME");
+import { env } from "@/lib/env";
 
 const YEARLY_QUERY = /* GraphQL */ `
   query ($from: DateTime!, $to: DateTime!) {
-    user(login: "${GITHUB_USERNAME}") {
+    user(login: "${env.GITHUB_USERNAME}") {
       contributionsCollection(from: $from, to: $to) {
         contributionCalendar {
           totalContributions
@@ -49,7 +43,7 @@ export async function fetchGitHubActivity(): Promise<ContributionCalendar> {
     }>(YEARLY_QUERY, {
       from,
       to,
-      headers: { authorization: `token ${GITHUB_TOKEN}` },
+      headers: { authorization: `token ${env.GITHUB_TOKEN}` },
     });
 
     const { contributionCalendar } = user.contributionsCollection;
@@ -62,7 +56,7 @@ export async function fetchGitHubActivity(): Promise<ContributionCalendar> {
 
 const LANGUAGES_QUERY = /* GraphQL */ `
   query ($after: String) {
-    user(login: "${GITHUB_USERNAME}") {
+    user(login: "${env.GITHUB_USERNAME}") {
       repositories(
         first: 100,
         ownerAffiliations: OWNER,
@@ -102,7 +96,7 @@ export async function fetchMostUsedLanguages(): Promise<LanguageStats> {
       };
     }>(LANGUAGES_QUERY, {
       after: cursor,
-      headers: { authorization: `token ${GITHUB_TOKEN}` },
+      headers: { authorization: `token ${env.GITHUB_TOKEN}` },
     });
 
     const {

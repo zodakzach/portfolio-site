@@ -1,10 +1,10 @@
-// src/app/api/contact/route.tsx
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import { EmailTemplate } from "@/components/email-template";
 import { contactSchema, type ContactInput } from "@/lib/validators/contact";
+import { env } from "@/lib/env";
 
-const resend = new Resend(process.env.RESEND_API_KEY!);
+const resend = new Resend(env.RESEND_API_KEY!);
 
 export async function POST(request: Request) {
   // 1) try to parse + validate JSON
@@ -30,7 +30,7 @@ export async function POST(request: Request) {
   const { name, email, message, recaptchaToken } = data;
 
   // 2) verify reCAPTCHA
-  const secretKey = process.env.RECAPTCHA_SECRET_KEY!;
+  const secretKey = env.RECAPTCHA_SECRET_KEY!;
   const verifyRes = await fetch(
     "https://www.google.com/recaptcha/api/siteverify",
     {
@@ -52,8 +52,8 @@ export async function POST(request: Request) {
   // 3) send the email
   try {
     const result = await resend.emails.send({
-      from: process.env.FROM_EMAIL!,
-      to: [process.env.TO_EMAIL!],
+      from: env.FROM_EMAIL!,
+      to: [env.TO_EMAIL!],
       subject: `New portfolio contact form submission from ${name}`,
       react: <EmailTemplate name={name} email={email} message={message} />,
       replyTo: email,

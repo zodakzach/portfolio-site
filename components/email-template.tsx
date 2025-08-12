@@ -1,4 +1,3 @@
-// src/components/email-template.tsx
 import React from "react";
 
 interface EmailTemplateProps {

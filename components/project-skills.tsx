@@ -5,7 +5,6 @@ import { Progress } from "@/components/ui/progress";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowRight, ExternalLink } from "lucide-react";
 import Link from "next/link";
-
 import ProjectCard from "@/components/project-card";
 import { getFeaturedProjects } from "@/data/projects";
 import { getSkillCategories, getSkillsByCategory } from "@/data/skills";

@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react";
 import CalendarHeatmap from "react-calendar-heatmap";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import type { ContributionCalendar, LanguageStat } from "@/types";
+import type { ContributionCalendar, LanguageStats } from "@/types";
 import {
   Select,
   SelectContent,
@@ -16,7 +16,7 @@ import { Flame } from "lucide-react";
 
 interface GitHubActivityProps {
   calendar: ContributionCalendar;
-  topLanguages: LanguageStat[];
+  topLanguages: LanguageStats;
 }
 
 export default function GitHubActivity({
