@@ -28,7 +28,7 @@ const formSchema = contactSchema.omit({ recaptchaToken: true });
 export type ContactFormValues = z.infer<typeof formSchema>;
 
 export default function ContactForm() {
-  const { theme } = useTheme();
+  const { resolvedTheme } = useTheme(); // ✅ system-safe
   const [mounted, setMounted] = useState(false);
 
   // Avoid SSR mismatch for next-themes
@@ -152,10 +152,10 @@ export default function ContactForm() {
             {mounted ? (
               <ReCAPTCHA
                 ref={recaptchaRef}
-                key={theme} // force remount on theme change
+                key={resolvedTheme} // force remount on theme change
                 sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY!}
                 onChange={(token: string | null) => setRecaptchaToken(token)}
-                theme={theme === "dark" ? "dark" : "light"}
+                theme={resolvedTheme === "dark" ? "dark" : "light"}
                 className="scale-90 transform md:scale-100"
               />
             ) : (
