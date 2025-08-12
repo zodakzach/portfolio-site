@@ -31,7 +31,7 @@ export default function Component() {
             </Button>
             <Button variant="ghost" asChild>
               <Link
-                href="/resume.pdf"
+                href="https://rxresu.me/zodakzach/resume"
                 target="_blank"
                 rel="noopener noreferrer"
               >
