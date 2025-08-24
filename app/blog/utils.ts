@@ -1,13 +1,6 @@
 import fs from "fs";
 import path from "path";
-
-export type Metadata = {
-  title: string;
-  publishedAt: string;
-  summary: string;
-  image?: string;
-  categories?: string[];
-};
+import type { GridPostData, Metadata, BlogPost } from "@/types/blog";
 
 function parseFrontmatter(fileContent: string) {
   const frontmatterRegex = /---\s*([\s\S]*?)\s*---/;
@@ -64,7 +57,7 @@ function readMDXFile(filePath) {
   return parseFrontmatter(rawContent);
 }
 
-function getMDXData(dir) {
+function getMDXData(dir): BlogPost[] {
   let mdxFiles = getMDXFiles(dir);
   return mdxFiles.map((file) => {
     let { metadata, content } = readMDXFile(path.join(dir, file));
@@ -80,6 +73,22 @@ function getMDXData(dir) {
 
 export function getBlogPosts() {
   return getMDXData(path.join(process.cwd(), "app", "blog", "posts"));
+}
+
+// Maps a BlogPost (metadata + slug) into the UI card shape
+export function toGridPostData(
+  post: Pick<BlogPost, "metadata" | "slug">,
+): GridPostData {
+  const { metadata, slug } = post;
+  return {
+    title: metadata.title,
+    slug: { current: slug },
+    excerpt: metadata.summary,
+    image: metadata.image
+      ? { src: metadata.image, alt: metadata.title, lqip: undefined }
+      : undefined,
+    categories: metadata.categories ?? [],
+  };
 }
 
 export function formatDate(date: string, includeRelative = false) {

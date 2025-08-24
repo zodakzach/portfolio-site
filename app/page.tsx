@@ -32,7 +32,6 @@ export default async function Page() {
           asset: {
             metadata: {
               dimensions: { width: 800, height: 600 },
-              lqip: "data:image/png;base64,iVBORw0KGgoAAAANS…",
             },
           },
         }}
@@ -50,7 +49,6 @@ export default async function Page() {
               _id: "1",
               url: "/logos/vercel.svg",
               metadata: {
-                lqip: "data:image/svg+xml;base64,PHN2ZyB4...etc",
                 mimeType: "image/svg+xml",
                 dimensions: { width: 120, height: 40 },
               },
@@ -62,7 +60,6 @@ export default async function Page() {
               _id: "2",
               url: "/logos/next-js.svg",
               metadata: {
-                lqip: "data:image/svg+xml;base64,PHN2ZyB4...etc",
                 mimeType: "image/svg+xml",
                 dimensions: { width: 100, height: 100 },
               },
@@ -74,7 +71,6 @@ export default async function Page() {
               _id: "3",
               url: "/logos/tailwind-css.svg",
               metadata: {
-                lqip: "data:image/svg+xml;base64,PHN2ZyB4...etc",
                 mimeType: "image/svg+xml",
                 dimensions: { width: 100, height: 100 },
               },
@@ -86,7 +82,6 @@ export default async function Page() {
               _id: "4",
               url: "/logos/shadcn.svg",
               metadata: {
-                lqip: "data:image/svg+xml;base64,PHN2ZyB4...etc",
                 mimeType: "image/svg+xml",
                 dimensions: { width: 100, height: 100 },
               },
@@ -98,7 +93,6 @@ export default async function Page() {
               _id: "5",
               url: "/logos/sanity.svg",
               metadata: {
-                lqip: "data:image/svg+xml;base64,PHN2ZyB4...etc",
                 mimeType: "image/svg+xml",
                 dimensions: { width: 100, height: 100 },
               },
@@ -110,7 +104,6 @@ export default async function Page() {
               _id: "6",
               url: "/logos/react.svg",
               metadata: {
-                lqip: "data:image/svg+xml;base64,PHN2ZyB4...etc",
                 mimeType: "image/svg+xml",
                 dimensions: { width: 100, height: 100 },
               },

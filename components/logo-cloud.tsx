@@ -49,10 +49,9 @@ export default function LogoCloud({ title, images = [] }: LogoCloudProps) {
                 const { url, metadata } = image.asset;
                 const width = metadata?.dimensions?.width ?? 220;
                 const height = metadata?.dimensions?.height ?? 90;
-                const placeholder =
-                  metadata?.lqip && metadata?.mimeType !== "image/svg+xml"
-                    ? "blur"
-                    : undefined;
+                const isSvg = metadata?.mimeType === "image/svg+xml";
+                const lqip = !isSvg ? metadata?.lqip : undefined;
+                const placeholder = lqip ? "blur" : "empty";
                 return (
                   <div
                     key={`${image.asset._id}-${arrayIndex}-${index}`}
@@ -65,7 +64,7 @@ export default function LogoCloud({ title, images = [] }: LogoCloudProps) {
                       height={height}
                       priority={arrayIndex === 0 && index < 3}
                       placeholder={placeholder}
-                      blurDataURL={metadata?.lqip}
+                      blurDataURL={lqip}
                       className="opacity-80 grayscale transition hover:opacity-100 hover:grayscale-0"
                     />
                   </div>

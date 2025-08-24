@@ -2,20 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { ChevronRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-
-interface ImageData {
-  src: string;
-  alt?: string;
-  lqip?: string;
-}
-
-export interface GridPostData {
-  title: string;
-  slug: { current: string };
-  excerpt?: string;
-  image?: ImageData;
-  categories?: string[];
-}
+import type { GridPostData } from "@/types/blog";
 
 interface GridPostProps {
   post: GridPostData;

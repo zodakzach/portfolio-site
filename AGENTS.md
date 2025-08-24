@@ -40,3 +40,12 @@
 
 - Required env vars validated in `lib/env.ts`: `RESEND_API_KEY`, `FROM_EMAIL`, `TO_EMAIL`, `RECAPTCHA_SECRET_KEY`, `NEXT_PUBLIC_RECAPTCHA_SITE_KEY`, `GITHUB_TOKEN`, `GITHUB_USERNAME`.
 - Store secrets in `.env.local` (not committed). Missing/invalid vars will throw at runtime via Zod validation.
+
+## Local Data & Blog Content
+
+- Data folder: Local, versioned data lives in `data/` as simple TypeScript modules (e.g., `data/projects.ts`, `data/skills.ts`). Export plain objects/arrays and small selector helpers; do not introduce runtime I/O in this layer.
+- Adding data: Update the exported arrays in `data/*.ts` files. Keep shapes in sync with their exported interfaces (e.g., `Project`, `Skill`).
+- Blog posts source: Blog content is stored as `.mdx` files under `app/blog/posts/`.
+- Blog loader: `app/blog/utils.ts#getBlogPosts()` reads `.mdx` files from `app/blog/posts/`, parses frontmatter, and returns `{ metadata, slug, content }` for each post.
+- Frontmatter fields: `title` (string), `publishedAt` (ISO date), `summary` (string), optional `image` (string URL/path), optional `categories` (string[]).
+- New post workflow: Create `app/blog/posts/<slug>.mdx` with a YAML frontmatter block and MDX body; the post will be picked up automatically by `getBlogPosts()` and downstream components.

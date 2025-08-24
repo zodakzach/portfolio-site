@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
-import { getBlogPosts } from "app/blog/utils";
-import GridPost, { GridPostData } from "@/components/post-card";
+import { getBlogPosts, toGridPostData } from "app/blog/utils";
+import GridPost from "@/components/post-card";
+import type { GridPostData } from "@/types/blog";
 
 export default function BlogPreview() {
   // 1) load + sort + take 3 most recent
@@ -16,16 +17,8 @@ export default function BlogPreview() {
     .slice(0, 3);
 
   // 2) map into the shape GridPost expects
-  const recentGridPosts: GridPostData[] = recentPosts.map(
-    ({ metadata, slug }) => ({
-      title: metadata.title,
-      slug: { current: slug },
-      excerpt: metadata.summary,
-      image: metadata.image
-        ? { src: metadata.image, alt: metadata.title, lqip: undefined }
-        : undefined,
-      categories: metadata.categories ?? [],
-    }),
+  const recentGridPosts: GridPostData[] = recentPosts.map((p) =>
+    toGridPostData({ metadata: p.metadata, slug: p.slug }),
   );
 
   return (
