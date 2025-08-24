@@ -107,9 +107,9 @@ export default function Hero({
         className="pointer-events-none absolute inset-0 select-none"
         aria-hidden="true"
       >
-        <div className="absolute -top-4 -left-4 h-72 w-72 rounded-full bg-gradient-to-r from-blue-400/10 to-purple-400/10 blur-3xl motion-safe:animate-pulse" />
-        <div className="absolute top-1/2 -right-4 h-72 w-72 rounded-full bg-gradient-to-r from-purple-400/10 to-pink-400/10 blur-3xl [animation-delay:2s] motion-safe:animate-pulse" />
-        <div className="absolute -bottom-8 left-1/3 h-72 w-72 rounded-full bg-gradient-to-r from-green-400/10 to-blue-400/10 blur-3xl [animation-delay:4s] motion-safe:animate-pulse" />
+        <div className="absolute -top-4 -left-4 h-72 w-72 rounded-full bg-gradient-to-r from-blue-400/10 to-purple-400/10 blur-3xl animate-pulse" />
+        <div className="absolute top-1/2 -right-4 h-72 w-72 rounded-full bg-gradient-to-r from-purple-400/10 to-pink-400/10 blur-3xl [animation-delay:2s] animate-pulse" />
+        <div className="absolute -bottom-8 left-1/3 h-72 w-72 rounded-full bg-gradient-to-r from-green-400/10 to-blue-400/10 blur-3xl [animation-delay:4s] animate-pulse" />
       </div>
 
       {/* Moving dots */}
@@ -127,7 +127,7 @@ export default function Hero({
               animationDelay: d.delay,
             }}
           >
-            <div className="h-full w-full rounded-full bg-current motion-safe:animate-ping" />
+            <div className="h-full w-full rounded-full bg-current animate-ping" />
           </div>
         ))}
       </div>
@@ -137,25 +137,25 @@ export default function Hero({
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-2">
           <div className="flex flex-col justify-center">
             {tagLine && (
-              <p className="motion-safe:animate-fade-up opacity-0 [animation-delay:100ms]">
+              <p className="animate-fade-up opacity-0 [animation-delay:100ms]">
                 <span className="text-base font-semibold">{tagLine}</span>
               </p>
             )}
 
             {title && (
-              <h1 className="motion-safe:animate-fade-up mt-4 text-4xl leading-tight font-bold opacity-0 [animation-delay:200ms] md:text-5xl lg:text-6xl">
+              <h1 className="animate-fade-up mt-4 text-4xl leading-tight font-bold opacity-0 [animation-delay:200ms] md:text-5xl lg:text-6xl">
                 {title}
               </h1>
             )}
 
             {body && (
-              <div className="motion-safe:animate-fade-up mt-6 text-lg opacity-0 [animation-delay:300ms]">
+              <div className="animate-fade-up mt-6 text-lg opacity-0 [animation-delay:300ms]">
                 {body}
               </div>
             )}
 
             {links && links.length > 0 && (
-              <div className="motion-safe:animate-fade-up mt-10 flex flex-wrap gap-4 opacity-0 [animation-delay:400ms]">
+              <div className="animate-fade-up mt-10 flex flex-wrap gap-4 opacity-0 [animation-delay:400ms]">
                 {links.map((link, idx) => (
                   <Button
                     key={`${link.href}-${link.title}-${idx}`}
@@ -179,7 +179,7 @@ export default function Hero({
           {image && (
             <div className="flex items-center justify-center">
               <Image
-                className="motion-safe:animate-fade-up rounded-xl opacity-0 [animation-delay:500ms]"
+                className="animate-fade-up rounded-xl opacity-0 [animation-delay:500ms]"
                 src={image.url || "/placeholder.svg"}
                 alt={image.alt || "Hero image"}
                 width={image.asset?.metadata?.dimensions?.width ?? 800}
