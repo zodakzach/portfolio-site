@@ -8,9 +8,20 @@ import { Project } from "@/data/projects";
 
 interface ProjectCardProps {
   project: Project;
+  // Optional: override responsive sizes string if your grid differs
+  imageSizes?: string;
+  // Optional: mark above-the-fold cards as priority
+  priority?: boolean;
 }
 
-export default function ProjectCard({ project }: ProjectCardProps) {
+const DEFAULT_CARD_SIZES =
+  "(min-width: 1280px) 33vw, (min-width: 768px) 50vw, 100vw";
+
+export default function ProjectCard({
+  project,
+  imageSizes,
+  priority = false,
+}: ProjectCardProps) {
   return (
     <Card
       key={project.id}
@@ -22,8 +33,14 @@ export default function ProjectCard({ project }: ProjectCardProps) {
           alt={project.title}
           fill
           className="object-cover transition-transform duration-300 group-hover:scale-105"
+          sizes={imageSizes ?? DEFAULT_CARD_SIZES}
+          // Cards are usually below the fold; keep lazy unless you know it's above
+          priority={priority}
+          loading={priority ? "eager" : "lazy"}
+          // quality={75} // optional: uncomment to cap quality
         />
       </div>
+
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
           {project.title}
@@ -53,6 +70,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
           </div>
         </CardTitle>
       </CardHeader>
+
       <CardContent>
         <p className="text-muted-foreground mb-4">{project.description}</p>
         <div className="flex flex-wrap gap-2">
