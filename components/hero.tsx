@@ -107,9 +107,9 @@ export default function Hero({
         className="pointer-events-none absolute inset-0 select-none"
         aria-hidden="true"
       >
-        <div className="absolute -top-4 -left-4 h-72 w-72 rounded-full bg-gradient-to-r from-blue-400/10 to-purple-400/10 blur-3xl animate-pulse" />
-        <div className="absolute top-1/2 -right-4 h-72 w-72 rounded-full bg-gradient-to-r from-purple-400/10 to-pink-400/10 blur-3xl [animation-delay:2s] animate-pulse" />
-        <div className="absolute -bottom-8 left-1/3 h-72 w-72 rounded-full bg-gradient-to-r from-green-400/10 to-blue-400/10 blur-3xl [animation-delay:4s] animate-pulse" />
+        <div className="absolute -top-4 -left-4 h-72 w-72 animate-pulse rounded-full bg-gradient-to-r from-blue-400/10 to-purple-400/10 blur-3xl" />
+        <div className="absolute top-1/2 -right-4 h-72 w-72 animate-pulse rounded-full bg-gradient-to-r from-purple-400/10 to-pink-400/10 blur-3xl [animation-delay:2s]" />
+        <div className="absolute -bottom-8 left-1/3 h-72 w-72 animate-pulse rounded-full bg-gradient-to-r from-green-400/10 to-blue-400/10 blur-3xl [animation-delay:4s]" />
       </div>
 
       {/* Moving dots */}
@@ -127,7 +127,7 @@ export default function Hero({
               animationDelay: d.delay,
             }}
           >
-            <div className="h-full w-full rounded-full bg-current animate-ping" />
+            <div className="h-full w-full animate-ping rounded-full bg-current" />
           </div>
         ))}
       </div>

@@ -1,0 +1,522 @@
+---
+title: 'From Go to Serverless — How I Cut My Discord Bot's Hosting Bill to $0'
+publishedAt: '2025-10-22'
+image: '/discord-bot.png'
+summary: 'I built a Discord bot to handle fight announcements in my server. After a month on a tiny VM, I was paying $5+ just to keep it running. So I rebuilt it for serverless and now pay nothing.'
+categories:
+  - Discord
+  - Dressed.js
+  - Discord-bot
+---
+
+> **TL;DR:** I built a Discord bot to handle fight announcements in my server. After a month on a tiny VM, I was paying $5+ just to keep it running. So I rebuilt it for serverless and now pay nothing.
+
+---
+
+## 1) Introduction
+
+I enjoy watching combat sports. UFC fights, boxing matches, MMA events—I wanted a way to stay on top of them without constantly checking ESPN. So I did what any engineer would do: I built a Discord bot.
+
+The idea was simple: a bot that automatically posts fight announcements to my Discord server when events are coming up. Add a couple of slash commands to check the next event, and boom—I've got a personalized fight calendar right in Discord.
+
+For the first version, I went with the "classic" approach: a Go service running on a tiny VM, connected to Discord via WebSocket, listening for commands and posting reminders on schedule. It worked great. But after my first month on Fly.io, I noticed something: I was paying $5+ just to keep the bot running—even though it only posted once a day and answered the occasional command.
+
+That's when I realized something fundamental: **Discord doesn't actually require a persistent connection for what my bot was doing.** The framework I was using (the WebSocket Gateway) was overkill. Discord has an HTTP-based Interactions model specifically for this kind of thing—you receive commands as HTTP POST requests, process them, and respond. No persistent connection needed.
+
+I decided to rebuild the bot from scratch using this model, switch to TypeScript and a serverless platform, and see if I could get the monthly bill down.
+
+**Spoiler**: I did. It's now $0.
+
+---
+
+## 2) The Original Setup: Go + Fly.io
+
+### How I built v1
+
+My first approach was straightforward. I used **Go** with the `discordgo` library, which gave me a clean interface to connect to Discord's WebSocket Gateway. My bot would:
+- Stay connected to Discord 24/7
+- Listen for slash commands in real-time
+- Run a daily scheduler that checked ESPN for upcoming fights
+- Post reminders to my server when events were coming up
+- Keep track of what it had already posted (to avoid duplicates)
+
+I containerized it and deployed it on **Fly.io**, a platform that lets you run applications on lightweight virtual machines. The setup was simple: push a Docker image, Fly runs it globally, done.
+
+### Why the costs crept up
+
+After about a month, I checked my Fly.io bill. It was over $5 for that month alone.
+
+At first, I thought I'd made a mistake. But looking at the breakdown:
+- A tiny machine (1 CPU, 256 MB RAM) costs around $5.70/month just to exist
+- My bot didn't use much resources—the CPU was idle 99% of the time
+- But Fly's pricing is usage-based: you pay per second the machine is running
+
+So even though my bot spent most of its time sleeping, waiting for a command or for the daily scheduler to trigger, I was paying for every single second it was alive.
+
+Let me do the math: if I kept this running, that's **$5.70 × 12 = $68+ per year** just to keep a process sleeping on a server.
+
+For a personal bot that posts once a day, that felt... inefficient.
+
+### The "always-on" problem
+
+Here's the core issue with the always-on approach: I was paying for the *infrastructure*, not for the *work it does*. My bot does very little work:
+- Process a slash command: a few milliseconds, once a week maybe
+- Check for upcoming fights: takes maybe 500ms, once a day
+- Post a reminder: a few hundred milliseconds, one or two times a day
+
+Everything else? Waiting. Idling. Doing nothing. But still billing me.
+
+At this point, I started wondering: **Is there a way to only pay for the moments my bot is actually working?**
+
+---
+
+## 3) The Realization: How Discord Interactions Work
+
+I was already familiar with Discord's API, so I knew about the Interactions model—I just hadn't connected the dots that it was perfect for my use case.
+
+### Gateway vs. Interactions
+
+Discord gives you two ways to build a bot:
+
+**The Gateway (what I was using):**
+- Your bot opens a persistent WebSocket connection
+- Discord sends events to you in real-time: someone ran a command, a user joined, etc.
+- You listen for these events and respond
+- This is great if you need live data: presence, voice channels, real-time member tracking
+- **But it requires your bot to always be connected**
+
+**Interactions (what I should've been using):**
+- Discord sends you an HTTP POST request when something happens
+- You process it and send back an HTTP response
+- No WebSocket, no persistent connection, no "always on"
+- This works great for slash commands, buttons, scheduled messages
+- **And it works perfectly with serverless**
+
+For my bot's actual use case, Interactions was a better fit. I didn't need real-time presence or voice features. I just needed to:
+1. Accept slash commands (HTTP request)
+2. Return data (HTTP response)
+3. Post announcements on schedule (outbound HTTP call)
+
+None of that requires a persistent connection.
+
+### How Interactions actually work
+
+When someone runs a slash command in my Discord server, here's what happens:
+
+1. **Discord sends an HTTP POST** to a URL I specify, with a JSON body containing the command details
+2. **I verify the request** (Discord signs it so I can be sure it's legit)
+3. **I process the command** and respond with JSON
+4. **Discord displays the result** in the channel
+
+The whole thing is stateless, HTTP-based, and doesn't require me to be listening 24/7. Discord's servers handle all of that.
+
+This was the "aha moment" for me. If I could rebuild my bot using Interactions instead of the Gateway, I could move it to **serverless**—and pay only when requests actually came in.
+
+---
+
+## 4) Discovering Serverless and Dressed
+
+Once I'd decided to switch to Interactions, the next question was: **where do I host this?**
+
+Traditional hosting (VMs, containers) didn't make sense anymore. I needed a platform that charged based on usage, not uptime. That's where serverless comes in.
+
+### What serverless actually means
+
+Serverless is a confusing term (there are definitely still servers involved), but here's the idea: you write a function, upload it, and the platform runs it when something triggers it. You pay only for:
+- The number of requests
+- How long they take to execute
+
+When nothing is happening, you pay nothing. It's the opposite of renting a VM.
+
+I looked at a few options: AWS Lambda, Vercel Functions, Deno Deploy, Cloudflare Workers. I settled on **Cloudflare Workers** because:
+- The free tier is genuinely generous: 100,000 requests/day
+- My bot gets maybe 50 requests/day, so I'd never leave the free tier
+- Deployment is instant (just run `wrangler deploy`)
+- Fast startup times (important for "cold starts")
+
+### Finding the right framework
+
+With serverless and HTTP Interactions, I needed a framework that made building Discord bots easy. I looked at a few:
+
+- **discord.js** is amazing, but it's built around the Gateway model. Using it for HTTP-only work felt like overkill.
+- **discord-interactions** is Discord's official lightweight library, but it's fairly bare-bones. You'd do a lot of wiring yourself.
+- **Dressed** is a newer framework built specifically for the HTTP Interactions model. It handles the boring stuff (signature verification, routing commands to handlers) and gets out of your way.
+
+Dressed clicked immediately. It's designed for serverless platforms and makes the code super clean.
+
+---
+
+
+## 5) The Rewrite: Shifting Mindsets
+
+Rewriting the bot wasn't just a matter of translating Go to TypeScript. It required rethinking how the bot worked fundamentally.
+
+### From Go to TypeScript
+
+I switched languages from Go to TypeScript, partly because:
+
+- TypeScript has better tooling for serverless (Wrangler, esbuild, etc.)
+- Dressed is TypeScript-native
+- The ecosystem is more mature for this kind of work
+
+But more importantly, the language shift forced me to rethink the architecture. Go encouraged me to think in terms of long-running processes. TypeScript + serverless encouraged me to think in terms of stateless request handlers.
+
+### The mental shift: processes to functions
+
+My original bot looked something like this (pseudocode):
+
+```go
+func main() {
+  // Connect and stay connected
+  bot.Connect()
+  
+  // Listen forever
+  bot.OnCommand(func() { ... })
+  
+  // Run a scheduler forever
+  for range ticker.C {
+    checkForEvents()
+    postReminders()
+  }
+}
+```
+
+The new bot looks completely different:
+
+```typescript
+// Cloudflare Worker entry: routes commands/components/events via Dressed.
+export default {
+  fetch: (request: Request, env: WorkerEnv, ctx: { waitUntil<T>(p: Promise<T>): void }) => {
+    registerEnv(env);
+    return handleRequest(
+      request,
+      (...args) => { const p = setupCommands(commands)(...args);   ctx.waitUntil(p); return p; },
+      (...args) => { const p = setupComponents(components)(...args); ctx.waitUntil(p); return p; },
+      (...args) => { const p = setupEvents(events)(...args);       ctx.waitUntil(p); return p; },
+      config,
+    );
+  },
+};
+```
+
+And a command is just a function. For example, here's the real /settings command handler:
+
+```typescript
+export const config: CommandConfig = {
+  description: "Configure fight-night notifications for this server.",
+  options: [
+    // org | channel | delivery | hour | timezone | notifications | events ...
+  ],
+};
+
+export default async function settingsCommand(interaction: CommandInteraction): Promise<void> {
+  if (!interaction.guild_id) {
+    await interaction.reply({ content: "You can only change settings from inside a server.", ephemeral: true });
+    return;
+  }
+  // ...inspect subcommand, update guild settings, and reply
+}
+```
+
+No connection logic, no listening loop, no process that stays alive. Just: "when this happens, run this code."
+
+It's a fundamentally different way of thinking about code.
+
+### The other big change: no persistent state
+
+In my Go bot, I could keep things in memory:
+
+```go
+var eventCache Event
+var lastPostedAt time.Time
+```
+
+These variables would persist as long as the process was running. I could update them, check them, use them across multiple invocations.
+
+With serverless, that's gone. Each request is isolated. The function runs, completes, and disappears. Any state you want to persist needs to live somewhere else: a database, a key-value store, etc.
+
+For my bot, I switched to Workers KV (Cloudflare's key-value store). It's simple and free for hobby use:
+
+```typescript
+// Update and persist guild settings (uses Workers KV under the hood)
+export async function updateGuildSettings(
+  guildId: string,
+  patch: Partial<GuildSettings>,
+): Promise<GuildSettings> {
+  const current = await getGuildSettings(guildId);
+  const updated = { ...current, ...patch };
+  cache.set(guildId, updated);
+
+  const kv = resolveNamespace();
+  if (kv) {
+    try {
+      await kv.put(KEY_PREFIX + guildId, JSON.stringify(updated));
+    } catch (error) {
+      console.error(`Failed to persist guild settings for ${guildId}:`, error);
+    }
+  }
+  return updated;
+}
+```
+
+This took some getting used to (I had to think about what state actually mattered), but it was actually cleaner than managing an in-process cache.
+
+### Handling scheduled tasks without a persistent process
+
+In my original bot, I had a simple loop:
+
+```go
+ticker := time.NewTicker(24 * time.Hour)
+for range ticker.C {
+  checkForEvents()
+  postReminders()
+}
+```
+
+You can't do this on serverless—there's no persistent process to run the loop.
+
+Instead, Cloudflare Workers lets you use Cron Triggers. You define a schedule in your config:
+
+```toml
+[[triggers.crons]]
+crons = ["0 8 * * *"]  # Every day at 8 AM UTC
+```
+
+And a handler runs at that time:
+
+```typescript
+// (Scheduled handler calls into the same notifier logic used by commands/events.)
+export default {
+  fetch: /* ...as above... */,
+  // scheduled: async (event: ScheduledEvent, env: WorkerEnv, ctx: ExecutionContext) => {
+  //   await notifyAllGuilds(env);
+  // },
+};
+```
+
+Cloudflare's infrastructure handles the timing—no need for a persistent scheduler in my code.
+
+## 6) Writing the New Version
+
+### What the code actually looks like
+
+Here's a simplified version of my serverless bot:
+
+```typescript
+// Worker entry wires Dressed command/component/event handlers.
+export default {
+  fetch: (request: Request, env: WorkerEnv, ctx: { waitUntil<T>(p: Promise<T>): void }) => {
+    registerEnv(env);
+    return handleRequest(
+      request,
+      (...args) => { const p = setupCommands(commands)(...args);   ctx.waitUntil(p); return p; },
+      (...args) => { const p = setupComponents(components)(...args); ctx.waitUntil(p); return p; },
+      (...args) => { const p = setupEvents(events)(...args);       ctx.waitUntil(p); return p; },
+      config,
+    );
+  },
+};
+```
+
+A concrete command handler (trimmed for brevity) looks like this:
+
+```typescript
+export const config: CommandConfig = {
+  description: "Configure fight-night notifications for this server.",
+  options: [
+    // org, channel, delivery, hour, timezone, notifications, events...
+  ],
+};
+
+export default async function settingsCommand(interaction: CommandInteraction): Promise<void> {
+  if (!interaction.guild_id) {
+    await interaction.reply({
+      content: "You can only change settings from inside a server.",
+      ephemeral: true,
+    });
+    return;
+  }
+  // Validate and persist options, then reply with the current settings
+}
+```
+
+For posting and crossposting announcements, the bot hits Discord's HTTP API directly:
+
+```typescript
+async function discordFetch(token: string, path: string, init: RequestInit = {}): Promise<Response> {
+  const headers = new Headers(init.headers);
+  headers.set("Authorization", `Bot ${token}`);
+  if (!headers.has("Content-Type")) headers.set("Content-Type", "application/json");
+
+  const res = await fetch(`${DISCORD_API_BASE}${path}`, { ...init, headers });
+  if (!res.ok) {
+    const detail = await res.text().catch(() => "");
+    throw new Error(`Discord API ${res.status} ${res.statusText} (${path}): ${detail}`);
+  }
+  return res;
+}
+
+export async function sendDiscordMessage(token: string, channelId: string, payload: DiscordMessagePayload) {
+  const res = await discordFetch(token, `/channels/${channelId}/messages`, { method: "POST", body: JSON.stringify(payload) });
+  return res.json() as Promise<DiscordMessageResponse>;
+}
+
+export async function crosspostDiscordMessage(token: string, channelId: string, messageId: string): Promise<void> {
+  await discordFetch(token, `/channels/${channelId}/messages/${messageId}/crosspost`, { method: "POST", body: "{}" });
+}
+```
+
+The code is clean and straightforward. Each handler is focused on one thing. There's no infrastructure noise.
+
+---
+
+## 7) Deployment and Going Live
+
+### Setting up Cloudflare Workers
+
+The setup process was surprisingly simple:
+
+1. I created a new Wrangler project: `wrangler create my-fight-bot`
+2. I wrote my bot code
+3. I deployed it: `wrangler deploy`
+4. Cloudflare assigned me a URL: `https://my-fight-bot.example.workers.dev`
+
+### Connecting it to Discord
+
+In the Discord Developer Portal:
+1. I copied my Worker URL
+2. Pasted it into "Interactions Endpoint URL"
+3. Done—interactions now flowed to my Worker
+
+The whole process took about 5 minutes.
+
+### Testing before going live
+
+I created a private test server and ran both the old bot (on Fly.io) and the new bot (on Workers) simultaneously for a day. I wanted to make sure the new version worked smoothly before shutting down the old one.
+
+During that day, I noticed:
+- Commands were actually *faster* on Workers (probably because it's geographically closer to Discord)
+- No errors or weird behavior
+- The scheduled reminder posted at the right time
+
+After that test, I felt confident enough to switch over. I shut down the Fly.io machine and pointed my server to the Workers bot only.
+
+---
+
+## 8) Results: The Numbers
+
+### Cost before and after
+
+**Fly.io (1 month):**
+- Machine (1 CPU, 256 MB RAM): $5.70
+- Storage & bandwidth: ~$0.30
+- **Total: ~$6** for one month
+
+**Cloudflare Workers (current):**
+- Requests: ~60/day (well within 100k free limit)
+- KV operations: minimal
+- **Total: $0**
+
+If I kept the Fly.io setup, that's **$72 per year**. On Workers, it's free. That's not earth-shattering money, but it's the principle—I'm not paying for idle infrastructure anymore.
+
+### What actually changed
+
+Beyond the cost, I noticed:
+
+**Performance:**
+- Slash commands feel instant. Probably ~50ms round-trip vs. 100-200ms before
+- No reconnection issues (the Gateway would occasionally drop and reconnect, causing brief delays)
+- Scheduled reminders post reliably, no missed events
+
+**Simplicity:**
+- Deployment is now `wrangler deploy` instead of building a Docker image, pushing it to a registry, waiting for Fly to redeploy
+- No process manager to worry about
+- No SSH into a server to debug things
+- Errors appear in the Cloudflare dashboard instantly
+
+**Peace of mind:**
+- I don't worry about the bot crashing and not coming back online
+- Cloudflare's infrastructure is redundant; it doesn't go down
+- Scaling is automatic—if traffic spiked (unlikely, but possible), Workers would just handle it
+
+---
+
+## 9) Things I Learned
+
+### When serverless is perfect
+
+Serverless was the right choice for this bot because:
+- **Low request volume**: 50-100 requests/day is tiny
+- **Short execution time**: each handler takes `<100ms`
+- **Stateless logic**: no complex state management needed
+- **No persistent connections required**: HTTP works fine
+
+### When serverless wouldn't work
+
+If my bot needed:
+- **Voice features** (playing audio, etc.): that requires a persistent connection and would need a traditional server
+- **Real-time presence or member tracking**: Gateway-only features
+- **Long-running tasks** (30+ seconds): serverless has timeout limits
+- **Heavy background work**: could work, but would need a separate system
+
+### The broader lesson
+
+I think a lot of Discord bot creators stay on VMs or shared hosting because they've always done it that way. But for the majority of bots (ones that just handle commands and post messages), serverless is better in almost every way:
+- Cheaper (often free)
+- Simpler (fewer things to manage)
+- Faster (better performance)
+- More reliable (automatically scaled and redundant)
+
+The realization I had was: **just because your bot is always-on doesn't mean your infrastructure needs to be.**
+
+---
+
+## 10) The Code is Open Source
+
+I published the code on GitHub:
+- **Serverless version**: https://github.com/zodakzach/serverless-fight-night-bot
+- **Original Go version**: https://github.com/zodakzach/fight-night-discord-bot
+
+If you're thinking about making a similar migration, the serverless version should give you a template to work from. The original is there if you want to see the "before" picture.
+
+---
+
+## 11) What's Next
+
+The bot works great for my use case, but there's room to grow:
+
+**More sports organizations:**
+Right now it only tracks UFC. Adding boxing, wrestling, or other MMA promotions would be straightforward—just update the ESPN scraper.
+
+**Guild customization:**
+Build a web dashboard where other server admins could use my bot and customize it for their server (which fights to follow, notification times, etc.). Everything would live in Workers KV.
+
+**Open sourcing properly:**
+Right now it's MIT licensed on GitHub. I could make it easier for others to fork and run their own version.
+
+---
+
+## 12) Conclusion
+
+I built a Discord bot to help me track fight announcements in my server. The first version worked, but cost more than it should have. By switching to HTTP Interactions and serverless hosting, I cut the cost to $0 while actually improving performance and reliability.
+
+The journey taught me something valuable: **don't assume your infrastructure needs match the default approach.** Sometimes, looking at what you're actually doing and choosing a different path entirely is the better move.
+
+If you're running a Discord bot on a VM and wondering if there's a better way, there probably is. Especially if your bot mostly handles commands and doesn't need voice or real-time presence updates.
+
+The future of hobby Discord bots is serverless. And it's free.
+
+---
+
+## Resources
+
+**Code:**
+- Serverless fight bot: https://github.com/zodakzach/serverless-fight-night-bot
+- Original Go bot: https://github.com/zodakzach/fight-night-discord-bot
+
+**Useful links:**
+- [Discord Interactions Documentation](https://discord.com/developers/docs/interactions/receiving-and-responding)
+- [Cloudflare Workers](https://workers.cloudflare.com/)
+- [Wrangler CLI](https://developers.cloudflare.com/workers/wrangler/)
+- [Dressed.js](https://github.com/jackcog/dressed)
+- [Sentry Error Tracking](https://sentry.io/)
