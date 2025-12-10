@@ -69,8 +69,7 @@ function Table({ data }: { data: TableData }) {
 }
 
 // Custom Link Component
-interface CustomLinkProps
-  extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
+interface CustomLinkProps extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
   href?: string;
 }
 

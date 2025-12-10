@@ -8,7 +8,7 @@ export const contactSchema = z.object({
     .min(10, { message: "Message must be at least 10 characters." }),
   recaptchaToken: z
     .string()
-    .nonempty({ message: "reCAPTCHA token is required." }),
+    .min(1, { message: "reCAPTCHA token is required." }),
 });
 
 export type ContactInput = z.infer<typeof contactSchema>;

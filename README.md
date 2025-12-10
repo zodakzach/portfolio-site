@@ -10,7 +10,6 @@ This is my personal portfolio site, featuring a blog, project showcase, and a co
 - **Dynamic OG images**
 - **Syntax highlighting**
 - **[Tailwind CSS v4](https://tailwindcss.com/docs/upgrade-guide)** – official upgrade guide and docs
-- **[Vercel Speed Insights / Web Analytics](https://vercel.com/docs/concepts/analytics/overview)** – built‑in performance and analytics in Vercel
 - **[Geist font](https://vercel.com/design/geist)** – Vercel’s official typeface
 - **[Motion Animations](https://motion.dev)** – smooth animations with Motion.dev
 - **[Shadcn Components](https://ui.shadcn.com/)** – Tailwind + React component library
@@ -23,7 +22,7 @@ This is my personal portfolio site, featuring a blog, project showcase, and a co
 - [Shadcn UI](https://ui.shadcn.com/)
 - [Resend](https://resend.com/) email delivery
 - [Motion.dev](https://motion.dev/) for animations
-- [Vercel](https://vercel.com/) deployment and analytics
+- [Vercel](https://vercel.com/) deployment
 
 ## Demo
 
