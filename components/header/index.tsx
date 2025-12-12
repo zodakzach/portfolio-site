@@ -33,7 +33,7 @@ const navItems = [
 
 export default function Header() {
   return (
-    <header className="bg-background/70 sticky top-0 z-50 w-full border-b backdrop-blur-lg">
+    <header className="supports-[backdrop-filter]:bg-background/60 border-border/60 bg-background/90 sticky top-0 z-50 w-full border-b backdrop-blur-xl">
       <div className="container mx-auto flex h-16 items-center justify-between px-4 lg:px-8">
         {/* Avatar on the left */}
         <Link href="/" className="flex items-center gap-2">

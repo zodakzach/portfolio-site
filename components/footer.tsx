@@ -25,8 +25,24 @@ export default function Footer() {
   };
 
   return (
-    <footer>
-      <div className="dark:bg-background py-5 xl:py-5 dark:text-gray-300">
+    <footer className="relative mt-12">
+      <div className="pointer-events-none absolute inset-0 opacity-70">
+        <div
+          className="absolute top-0 -left-10 h-48 w-48 blur-3xl"
+          style={{
+            background:
+              "radial-gradient(circle at center, var(--glow-1), transparent 60%)",
+          }}
+        />
+        <div
+          className="absolute top-10 right-0 h-48 w-48 blur-3xl"
+          style={{
+            background:
+              "radial-gradient(circle at center, var(--glow-2), transparent 60%)",
+          }}
+        />
+      </div>
+      <div className="border-border/60 bg-card/80 text-foreground relative border-t px-4 py-10 backdrop-blur-xl lg:px-8">
         <Link className="mx-auto block w-8" href="/" aria-label="Home page">
           <Avatar>
             <AvatarImage src="/avatar.png" alt="Avatar" />

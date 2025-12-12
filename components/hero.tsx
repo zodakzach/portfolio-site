@@ -56,24 +56,37 @@ export default function Hero({
   links,
 }: HeroProps) {
   const uid = useId();
+  const [isMobile, setIsMobile] = React.useState(false);
   const patternId = `grid-${uid}`;
+
+  React.useEffect(() => {
+    const mql = window.matchMedia("(max-width: 768px)");
+    const handleChange = (event: MediaQueryListEvent) =>
+      setIsMobile(event.matches);
+
+    setIsMobile(mql.matches);
+    mql.addEventListener("change", handleChange);
+
+    return () => mql.removeEventListener("change", handleChange);
+  }, []);
 
   // Seeded positions for dots (SSR-safe)
   const dots = useMemo(() => {
     const seedBase = `${title ?? ""}|${tagLine ?? ""}|${image?.url ?? ""}`;
     const rand = mulberry32(hashString(seedBase || "hero"));
-    return Array.from({ length: 20 }, () => ({
+    const count = isMobile ? 12 : 20;
+    return Array.from({ length: count }, () => ({
       left: `${(rand() * 100).toFixed(2)}%`,
       top: `${(rand() * 100).toFixed(2)}%`,
       delay: `${(rand() * 5).toFixed(2)}s`,
     }));
-  }, [title, tagLine, image?.url]);
+  }, [title, tagLine, image?.url, isMobile]);
 
   return (
-    <section className="dark:bg-background relative overflow-hidden">
+    <section className="relative overflow-hidden">
       {/* Background: gradient wash + SVG grid */}
       <div
-        className="pointer-events-none absolute inset-0 opacity-40 select-none"
+        className="pointer-events-none absolute inset-0 -z-10 opacity-40 select-none"
         aria-hidden="true"
       >
         <div className="absolute inset-0 bg-gradient-to-br from-blue-100 via-transparent to-purple-100 dark:from-blue-950/20 dark:to-purple-950/20" />
@@ -104,7 +117,7 @@ export default function Hero({
 
       {/* Floating gradient blobs (kept light for perf) */}
       <div
-        className="pointer-events-none absolute inset-0 select-none"
+        className="pointer-events-none absolute inset-0 -z-10 select-none"
         aria-hidden="true"
       >
         <div className="absolute -top-4 -left-4 h-72 w-72 animate-pulse rounded-full bg-gradient-to-r from-blue-400/10 to-purple-400/10 blur-3xl" />
@@ -114,7 +127,7 @@ export default function Hero({
 
       {/* Moving dots */}
       <div
-        className="pointer-events-none absolute inset-0 select-none"
+        className="pointer-events-none absolute inset-0 -z-10 select-none"
         aria-hidden="true"
       >
         {dots.map((d, i) => (
