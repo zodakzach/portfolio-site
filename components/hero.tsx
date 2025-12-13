@@ -89,7 +89,7 @@ export default function Hero({
         className="pointer-events-none absolute inset-0 -z-10 opacity-40 select-none"
         aria-hidden="true"
       >
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-100 via-transparent to-purple-100 dark:from-blue-950/20 dark:to-purple-950/20" />
+        <div className="absolute inset-0 bg-linear-to-br from-blue-100 via-transparent to-purple-100 dark:from-blue-950/20 dark:to-purple-950/20" />
         <svg
           className="text-border absolute inset-0 h-full w-full"
           xmlns="http://www.w3.org/2000/svg"
@@ -120,9 +120,9 @@ export default function Hero({
         className="pointer-events-none absolute inset-0 -z-10 select-none"
         aria-hidden="true"
       >
-        <div className="absolute -top-4 -left-4 h-72 w-72 animate-pulse rounded-full bg-gradient-to-r from-blue-400/10 to-purple-400/10 blur-3xl" />
-        <div className="absolute top-1/2 -right-4 h-72 w-72 animate-pulse rounded-full bg-gradient-to-r from-purple-400/10 to-pink-400/10 blur-3xl [animation-delay:2s]" />
-        <div className="absolute -bottom-8 left-1/3 h-72 w-72 animate-pulse rounded-full bg-gradient-to-r from-green-400/10 to-blue-400/10 blur-3xl [animation-delay:4s]" />
+        <div className="absolute -top-4 -left-4 h-72 w-72 animate-pulse rounded-full bg-linear-to-r from-blue-400/10 to-purple-400/10 blur-3xl" />
+        <div className="absolute top-1/2 -right-4 h-72 w-72 animate-pulse rounded-full bg-linear-to-r from-purple-400/10 to-pink-400/10 blur-3xl [animation-delay:2s]" />
+        <div className="absolute -bottom-8 left-1/3 h-72 w-72 animate-pulse rounded-full bg-linear-to-r from-green-400/10 to-blue-400/10 blur-3xl [animation-delay:4s]" />
       </div>
 
       {/* Moving dots */}
