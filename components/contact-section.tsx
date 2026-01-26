@@ -62,10 +62,10 @@ export default function Component() {
             <p className="text-muted-foreground text-sm">
               Prefer email?{" "}
               <a
-                href="mailto:zachary@zodakzach.com"
+                href="mailto:zach@codeezy.dev"
                 className="underline underline-offset-4"
               >
-                zachary@zodakzach.com
+                zach@codeezy.dev
               </a>
             </p>
           </div>
